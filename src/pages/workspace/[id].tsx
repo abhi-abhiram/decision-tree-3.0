@@ -135,20 +135,21 @@ export default function Workspace() {
             <div className="flex flex-1 flex-col gap-2 overflow-auto text-left text-sm text-gray-900">
               {data.map((item) => (
                 <div
-                  className="group flex cursor-pointer flex-row items-center rounded-lg bg-gray-200 py-3 font-medium shadow-sm
-                     hover:bg-gray-300 [&>*]:px-2
+                  className="group flex cursor-pointer flex-row items-center rounded-lg bg-gray-200 py-3 font-medium shadow-sm transition-colors duration-200
+                  ease-in-out hover:bg-gray-300 [&>*]:px-2
                   "
                 >
                   <div className="relative w-1/2">
                     {item.name}
                     <div className="invisible absolute top-1/2 right-0 flex -translate-y-1/2 gap-1 group-hover:visible">
                       <button
-                        className="rounded-md p-1 text-gray-600 hover:scale-110 hover:bg-gray-100 hover:text-gray-500 hover:shadow-sm
+                        className="rounded-md p-1 text-gray-600 transition-all duration-200 ease-in-out hover:scale-110
+                        hover:bg-gray-100 hover:text-gray-500 hover:shadow-sm
                         "
                       >
                         <PencilSquareIcon className="h-5 w-5" />
                       </button>
-                      <button className="hover:text-red- rounded-md p-1 text-red-600 hover:scale-110 hover:bg-red-100 hover:shadow-sm ">
+                      <button className="hover:text-red- rounded-md p-1 text-red-600 transition-all duration-200 ease-in-out hover:scale-110 hover:bg-red-100 hover:shadow-sm">
                         <TrashIcon className="h-5 w-5" />
                       </button>
                     </div>
