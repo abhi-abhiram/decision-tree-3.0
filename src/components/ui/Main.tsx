@@ -7,7 +7,10 @@ export function Main({
 }: DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>) {
   return (
     <main
-      className={cn("flex-1 overflow-hidden bg-gray-50 py-4 px-5", className)}
+      className={cn(
+        "flex-1 overflow-hidden bg-gray-50 px-5 pb-5 pt-7",
+        className
+      )}
       {...props}
     />
   );

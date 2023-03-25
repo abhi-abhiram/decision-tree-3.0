@@ -68,7 +68,7 @@ export function MenuItem({
       {({ active, close, disabled }) => (
         <button
           className={cn(
-            "text-gray-900 ui-active:bg-blue-500 ui-active:text-white",
+            "text-gray-900 ui-active:bg-blue-600 ui-active:text-white",
             "group flex w-full items-center rounded-md px-2 py-2 text-sm",
             className
           )}

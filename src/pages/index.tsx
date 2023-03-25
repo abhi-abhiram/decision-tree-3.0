@@ -1,4 +1,8 @@
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import {
+  MagnifyingGlassIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
+} from "@heroicons/react/20/solid";
 import Head from "next/head";
 import Link from "next/link";
 import Layout from "~/components/ui/Layout";
@@ -17,7 +21,13 @@ const data = [
   { label: "Name 6", value: "6" },
 ];
 
-export function Nav() {
+export function Nav({
+  isShowing,
+  setIsShowing,
+}: {
+  isShowing: boolean;
+  setIsShowing: (isShowing: boolean) => void;
+}) {
   const [query, setQuery] = React.useState("");
 
   const filtereddata =
@@ -33,9 +43,27 @@ export function Nav() {
   const router = useRouter();
 
   return (
-    <nav className="overflow-auto border-r border-gray-200 bg-gray-50">
+    <nav
+      className={cn(
+        "relative scale-x-100 scroll-m-1 scroll-p-1 overflow-y-auto border-r border-gray-200 bg-gray-50 duration-200 ease-in-out",
+        isShowing ? "w-72" : "w-0 overflow-hidden p-0"
+      )}
+    >
       <div className="sticky top-0">
-        <div className="h-8 bg-gray-50"></div>
+        <div className="relative h-10 bg-gray-50">
+          <div className={cn("absolute right-0 top-1 block")}>
+            <button
+              className={cn(
+                "rounded-md p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-500 hover:shadow-sm"
+              )}
+              onClick={() => {
+                setIsShowing(!isShowing);
+              }}
+            >
+              <ChevronDoubleLeftIcon className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
         <div className=" bg-gray-50 px-3">
           <Textinput
             leftIcon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
@@ -44,7 +72,7 @@ export function Nav() {
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
-        <div className="h-6"></div>
+        <div className="h-5"></div>
       </div>
       <div className="mb-4 flex flex-col text-gray-600 last:border-b">
         {filtereddata.map((val) => (
@@ -66,6 +94,7 @@ export function Nav() {
 }
 
 export default function Home() {
+  const [isShowing, setIsShowing] = React.useState(true);
   return (
     <Layout>
       <Head>
@@ -74,10 +103,25 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <header className="w-screen border border-gray-200 bg-gray-50">
-        <h1 className="text-4xl font-bold">Header</h1>
+        <div className="flex h-10 items-center justify-between px-3">
+          <div className="flex items-center">
+            <button
+              className={cn(
+                "rounded-md p-1 text-gray-400 transition-opacity duration-200 ease-in-out hover:bg-gray-200 hover:text-gray-500 hover:shadow-sm",
+                isShowing ? "pointer-events-none opacity-0" : "opacity-100"
+              )}
+              onClick={() => {
+                setIsShowing(!isShowing);
+              }}
+            >
+              <ChevronDoubleRightIcon className="h-5 w-5" />
+            </button>
+            <div className="ml-2 text-gray-600">Workspace</div>
+          </div>
+        </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <Nav />
+        <Nav isShowing={isShowing} setIsShowing={setIsShowing} />
         <Main></Main>
       </div>
     </Layout>
