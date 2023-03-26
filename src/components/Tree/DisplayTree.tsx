@@ -141,11 +141,6 @@ export default function DisplayTree() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         connectionLineComponent={ConnectionEdge}
-        onInit={(props) => {
-          props.zoomTo(1, {
-            duration: 300,
-          });
-        }}
         fitView
         selectionMode={SelectionMode.Full}
         onNodeClick={(e, node) => {}}
