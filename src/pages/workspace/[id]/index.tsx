@@ -9,55 +9,10 @@ import { Dropdown, MenuGroup, MenuItem } from "~/components/ui/Dropdown";
 import Layout from "~/components/ui/Layout";
 import { Main } from "~/components/ui/Main";
 import { cn } from "~/utils";
-import { Nav } from "..";
+import { Nav } from "../..";
 import Link from "next/link";
 
 const data = [
-  {
-    name: "Tree 1",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 2",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 3",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 1",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 2",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 3",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 1",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 2",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
-  {
-    name: "Tree 3",
-    created: "2021-01-01",
-    updated: "2021-01-01",
-  },
   {
     name: "Tree 1",
     created: "2021-01-01",
@@ -80,7 +35,7 @@ export default function Workspace() {
   const [navShowing, setNavShowing] = React.useState(true);
   return (
     <Layout>
-      <header className="w-screen border border-gray-200 bg-gray-50">
+      <header className="w-screen border border-gray-200 bg-white">
         <div className="flex h-10 items-center justify-between px-3">
           <div className="flex items-center">
             <button
@@ -166,9 +121,10 @@ export default function Workspace() {
             <div className="flex flex-1 flex-col gap-2 overflow-auto text-left text-sm text-gray-900">
               {data.map((item) => (
                 <div
-                  className="group flex cursor-pointer flex-row items-center rounded-xl bg-gray-200 py-3 font-medium transition-colors duration-200 ease-in-out
-                  hover:bg-gray-300 hover:shadow-sm [&>*]:px-3
+                  className="group flex cursor-pointer flex-row items-center rounded-xl bg-gray-200 py-3 font-medium shadow-sm transition-colors duration-200
+                  ease-in-out hover:bg-gray-300 [&>*]:px-3
                   "
+                  key={item.name}
                 >
                   <div className="relative w-1/2">
                     {item.name}

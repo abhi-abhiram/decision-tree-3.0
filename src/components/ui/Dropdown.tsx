@@ -7,10 +7,12 @@ export function Dropdown({
   children,
   button,
   className,
+  onClose,
 }: {
   children: React.ReactNode;
   button: React.ReactNode;
   className?: string;
+  onClose?: () => void;
 }) {
   return (
     <Menu as="div" className="relative inline-block text-left">
@@ -23,6 +25,7 @@ export function Dropdown({
         leave="transition ease-in duration-75"
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
+        beforeLeave={onClose}
       >
         <Menu.Items
           className={cn(
