@@ -20,7 +20,8 @@ import * as d3 from "d3-hierarchy";
 const nodes: CustomNode[] = [
   {
     id: "1",
-    name: "Eve",
+    question:
+      "what is your name and your dad name and your mom name and etc etc what is your name and your dad name and your mom name and etc etc what is your name and your dad name and your mom name and etc etc what is your name and your dad name and your mom name and etc etc",
     parentId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -28,7 +29,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "2",
-    name: "Cain",
+    question: "what is your age?",
     parentId: "1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -36,7 +37,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "3",
-    name: "Seth",
+    question: "Seth",
     parentId: "1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -44,7 +45,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "4",
-    name: "Enos",
+    question: "Enos",
     parentId: "3",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -52,7 +53,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "5",
-    name: "Noam",
+    question: "Noam",
     parentId: "3",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -60,7 +61,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "6",
-    name: "Abel",
+    question: "Abel",
     parentId: "1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -68,7 +69,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "7",
-    name: "Awan",
+    question: "Awan",
     parentId: "1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -76,7 +77,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "8",
-    name: "Enoch",
+    question: "Enoch",
     parentId: "7",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -84,7 +85,7 @@ const nodes: CustomNode[] = [
   },
   {
     id: "9",
-    name: "Azura",
+    question: "Azura",
     parentId: "1",
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -111,7 +112,7 @@ const useStore = create<RFState>((set, get) => ({
       id: createId(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      name: parentNode.name + "'s child",
+      question: parentNode.question + "'s child",
       parentId: parentNode.id,
       treeId: parentNode.treeId,
     };
@@ -131,6 +132,7 @@ const useStore = create<RFState>((set, get) => ({
       edges: newEdges,
     });
   },
+
   onNodesChange: (changes: NodeChange[]) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
@@ -167,7 +169,7 @@ export function getTreeLayout<
     })(nodes);
 
   d3.tree<(typeof nodes)[number]>()
-    .nodeSize([100, 350])
+    .nodeSize([150, 400])
     .separation(function (a, b) {
       return a.parent == b.parent ? 1 : 1;
     })(root)

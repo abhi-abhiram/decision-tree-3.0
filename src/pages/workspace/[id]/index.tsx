@@ -11,6 +11,8 @@ import { Main } from "~/components/ui/Main";
 import { cn } from "~/utils";
 import { Nav } from "../..";
 import Link from "next/link";
+import Modal from "~/components/ui/Model";
+import { Textinput } from "~/components/ui/Textinput";
 
 const data = [
   {
@@ -30,9 +32,117 @@ const data = [
   },
 ];
 
+function CreateWorkspace() {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      <Button className="shadow-md" size="sm" onClick={() => setIsOpen(true)}>
+        <PlusIcon className="mr-2 h-5 w-5" />
+        Create Tree
+      </Button>
+      <Modal
+        title="Create Workspace"
+        isOpen={isOpen}
+        setIsOpen={() => setIsOpen(false)}
+        initialFocus={inputRef}
+      >
+        <div className="mt-2 flex flex-col gap-2">
+          <Textinput ref={inputRef} />
+          <div className="flex justify-end gap-2">
+            <Button>Create</Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setIsOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
+}
+
+function DeleteWorkspace({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
+
+  return (
+    <Modal
+      title="Delete Workspace"
+      isOpen={isOpen}
+      setIsOpen={onClose}
+      initialFocus={cancelRef}
+    >
+      <div className="mt-2 flex flex-col gap-2">
+        <p>Are you sure you want to delete this workspace?</p>
+        <div className="flex justify-end gap-2">
+          <Button className="bg-red-600 text-white hover:bg-red-500">
+            Delete
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            ref={cancelRef}
+            className="focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function RenameWorkspace({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  return (
+    <Modal
+      title="Rename Workspace"
+      isOpen={isOpen}
+      setIsOpen={onClose}
+      initialFocus={inputRef}
+    >
+      <div className="mt-2 flex flex-col gap-2">
+        <Textinput ref={inputRef} />
+        <div className="flex justify-end gap-2">
+          <Button>Rename</Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export default function Workspace() {
   const router = useRouter();
   const [navShowing, setNavShowing] = React.useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [rename, setRename] = React.useState(false);
+
   return (
     <Layout>
       <header className="w-screen border border-gray-200 bg-white">
@@ -75,11 +185,11 @@ export default function Workspace() {
                   <h1 className="text-2xl font-medium">workspace name</h1>
                   <Dropdown
                     button={
-                      <button className="rounded-md p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-500 ">
+                      <button className="rounded-md p-1 text-gray-500 hover:bg-gray-200 hover:bg-opacity-70 hover:text-gray-500">
                         <EllipsisHorizontalIcon className="h-5 w-5" />
                       </button>
                     }
-                    className=" top-0 mt-0 w-24 translate-x-8"
+                    className="z-10 w-24"
                   >
                     <MenuGroup>
                       <MenuItem>
@@ -89,12 +199,17 @@ export default function Workspace() {
                           </>
                         )}
                       </MenuItem>
-                    </MenuGroup>
-                    <MenuGroup>
-                      <MenuItem>
+                      <MenuItem onClick={() => setRename(true)}>
                         {({ active, close, disabled }) => <span>Rename</span>}
                       </MenuItem>
-                      <MenuItem className="text-red-600 ui-active:bg-red-600">
+                    </MenuGroup>
+                    <MenuGroup>
+                      <MenuItem
+                        className="text-red-600 ui-active:bg-red-600"
+                        onClick={() => {
+                          setDeleteModalOpen(true);
+                        }}
+                      >
                         {({ active, close, disabled }) => <span>Delete</span>}
                       </MenuItem>
                     </MenuGroup>
@@ -102,10 +217,7 @@ export default function Workspace() {
                 </div>
               </div>
               <div className="flex justify-between border-b border-gray-200 py-6">
-                <Button className="shadow-md" size="sm">
-                  <PlusIcon className="mr-2 h-5 w-5" />
-                  Create Tree
-                </Button>
+                <CreateWorkspace />
                 <div className="flex">
                   <Button>Button</Button>
                   <Button>Button</Button>
@@ -121,8 +233,8 @@ export default function Workspace() {
             <div className="flex flex-1 flex-col gap-2 overflow-auto text-left text-sm text-gray-900">
               {data.map((item) => (
                 <div
-                  className="group flex cursor-pointer flex-row items-center rounded-xl bg-gray-200 py-3 font-medium shadow-sm transition-colors duration-200
-                  ease-in-out hover:bg-gray-300 [&>*]:px-3
+                  className="group flex cursor-pointer flex-row items-center rounded-xl bg-gray-200 bg-opacity-50 py-3 font-medium shadow-sm transition-colors
+                  duration-200 ease-in-out hover:bg-gray-300 hover:bg-opacity-60 [&>*]:px-3
                   "
                   key={item.name}
                 >
@@ -149,6 +261,18 @@ export default function Workspace() {
           </div>
         </Main>
       </div>
+      <DeleteWorkspace
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+        }}
+      />
+      <RenameWorkspace
+        isOpen={rename}
+        onClose={() => {
+          setRename(false);
+        }}
+      />
     </Layout>
   );
 }

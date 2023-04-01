@@ -9,6 +9,8 @@ const buttonVariants = cva(
       variant: {
         default: "",
         unstyled: "border-none rounded-none",
+        secondary:
+          "bg-white text-gray-600 border border-gray-300 hover:bg-gray-50",
       },
       size: {
         default: "text-sm py-2 px-3 rounded-md",

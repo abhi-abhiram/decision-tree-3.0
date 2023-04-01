@@ -74,14 +74,14 @@ export function Nav({
         </div>
         <div className="h-5"></div>
       </div>
-      <div className="mb-4 flex flex-col text-gray-600 last:border-b">
+      <div className="mb-4 flex flex-col text-gray-600 ">
         {filtereddata.map((val) => (
           <Link
             href={`/workspace/${val.value}`}
             className={cn(
-              "border-t border-gray-300 px-6 py-3 transition-colors duration-200 ease-in-out hover:bg-blue-100 hover:text-blue-600",
+              " px-6 py-3 transition-colors duration-200 ease-in-out hover:bg-blue-50 hover:text-blue-600",
               router.query.id === val.value &&
-                "bg-blue-600 text-white hover:bg-blue-500 hover:text-white"
+                "bg-blue-50 bg-opacity-75 text-blue-600 hover:bg-blue-50 hover:bg-opacity-75"
             )}
             key={val.value}
           >
