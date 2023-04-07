@@ -17,8 +17,8 @@ import DisplayTree from "~/components/Tree/DisplayTree";
 import { ReactFlowProvider } from "reactflow";
 import { cn } from "~/utils";
 import { Textinput } from "~/components/ui/Textinput";
-import { Node as CustomNode } from "@prisma/client";
-import useStore, { RFState } from "~/components/Tree/store";
+import { type Node as CustomNode } from "@prisma/client";
+import useStore, { type RFState } from "~/components/Tree/store";
 import { shallow } from "zustand/shallow";
 import Tabs from "~/components/ui/Tabs";
 import { Tab } from "@headlessui/react";
@@ -284,7 +284,13 @@ export default function useWorkspaceId() {
             <DisplayTree />
           </ReactFlowProvider>
         </Main>
-        <RightNav isShowing={true} setIsShowing={() => {}} data={[]} />
+        <RightNav
+          isShowing={true}
+          setIsShowing={() => {
+            console.log("rightnav");
+          }}
+          data={[]}
+        />
       </div>
     </Layout>
   );
