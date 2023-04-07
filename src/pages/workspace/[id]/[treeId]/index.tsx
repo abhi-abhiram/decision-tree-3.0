@@ -1,4 +1,5 @@
 import {
+  ArrowDownCircleIcon,
   ArrowUpTrayIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
@@ -126,7 +127,7 @@ const options = [
   {
     label: "label",
     value: "value",
-    leftIcon: (
+    icon: (
       <span className="flex items-center justify-center rounded-md bg-purple-400 p-1 text-black">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -143,7 +144,7 @@ const options = [
   {
     label: "label 2",
     value: "value 2",
-    leftIcon: (
+    icon: (
       <span className="flex items-center justify-center rounded-md bg-purple-400 p-1 text-black">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -202,6 +203,7 @@ function RightNav({
               setSelected={(val) => {
                 setSelected(val);
               }}
+              showValueIcon
             />
           </div>
           <div className="mt-2">

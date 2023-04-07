@@ -8,11 +8,13 @@ export function Dropdown({
   button,
   className,
   onClose,
+  disabled,
 }: {
   children: React.ReactNode;
   button: React.ReactNode;
   className?: string;
   onClose?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <Menu as="div" className="relative inline-block text-left">
