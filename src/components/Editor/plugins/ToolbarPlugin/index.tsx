@@ -1,4 +1,8 @@
-import type { LexicalEditor, NodeKey } from "lexical";
+import {
+  type ElementFormatType,
+  type LexicalEditor,
+  type NodeKey,
+} from "lexical";
 
 import {
   $createCodeNode,
@@ -24,7 +28,7 @@ import {
   $createHeadingNode,
   $createQuoteNode,
   $isHeadingNode,
-  HeadingTagType,
+  type HeadingTagType,
 } from "@lexical/rich-text";
 import {
   $getSelectionStyleValueForProperty,
@@ -75,11 +79,18 @@ import {
   ArrowUturnLeftIcon,
   ArrowUturnRightIcon,
   Bars3BottomLeftIcon,
+  Bars3CenterLeftIcon,
   CodeBracketIcon,
   ListBulletIcon,
+  MinusIcon,
+  PhotoIcon,
+  PlayIcon,
+  PlusIcon,
+  TableCellsIcon,
 } from "@heroicons/react/20/solid";
 import { cn } from "~/utils";
 import Select from "~/components/ui/Select";
+import { InsertImageDialog } from "../ImagesPlugin";
 // import { EmbedConfigs } from "../AutoEmbedPlugin";
 // import { INSERT_COLLAPSIBLE_COMMAND } from "../CollapsiblePlugin";
 // import { InsertEquationDialog } from "../EquationsPlugin";
@@ -91,6 +102,112 @@ import Select from "~/components/ui/Select";
 // } from "../ImagesPlugin";
 // import { InsertPollDialog } from "../PollPlugin";
 // import { InsertNewTableDialog, InsertTableDialog } from "../TablePlugin";
+
+const AlignTypes: {
+  value: ElementFormatType | "indent" | "outdent";
+  label: string;
+  icon?: React.ReactNode;
+}[] = [
+  {
+    value: "left",
+    label: "Left Align",
+    icon: (
+      <i
+        className="h-4 w-4 text-gray-500"
+        style={{
+          backgroundImage: "url(/assets/text-left.svg)",
+        }}
+      />
+    ),
+  },
+  {
+    value: "center",
+    label: "Center Align",
+    icon: (
+      <i
+        className="h-4 w-4 text-gray-500"
+        style={{
+          backgroundImage: "url(/assets/text-center.svg)",
+        }}
+      />
+    ),
+  },
+  {
+    value: "right",
+    label: "Right Align",
+    icon: (
+      <i
+        className="h-4 w-4 text-gray-500"
+        style={{
+          backgroundImage: "url(/assets/text-right.svg)",
+        }}
+      />
+    ),
+  },
+  {
+    value: "justify",
+    label: "Justify",
+    icon: (
+      <i
+        className="h-4 w-4 text-gray-500"
+        style={{
+          backgroundImage: "url(/assets/justify.svg)",
+        }}
+      />
+    ),
+  },
+  {
+    value: "indent",
+    label: "Indent",
+    icon: (
+      <i
+        className="h-4 w-4 text-gray-500"
+        style={{
+          backgroundImage: "url(/assets/indent.svg)",
+        }}
+      />
+    ),
+  },
+  {
+    value: "outdent",
+    label: "Outdent",
+    icon: (
+      <i
+        className="h-4 w-4 text-gray-500"
+        style={{
+          backgroundImage: "url(/assets/outdent.svg)",
+        }}
+      />
+    ),
+  },
+];
+
+const InsertTypes: {
+  value: "image" | "horizontalRule" | "table" | "collapsible";
+  label: string;
+  icon?: React.ReactNode;
+}[] = [
+  {
+    value: "image",
+    label: "Image",
+    icon: <PhotoIcon className="h-4 w-4 text-gray-500" />,
+  },
+  {
+    value: "horizontalRule",
+    label: "Horizontal Rule",
+    icon: <MinusIcon className="h-4 w-4 text-gray-500" />,
+  },
+  {
+    value: "table",
+    label: "Table",
+    icon: <TableCellsIcon className="h-4 w-4 text-gray-500" />,
+  },
+  {
+    value: "collapsible",
+    label: "Collapsible",
+    icon: <PlayIcon className="h-4 w-4 text-gray-500" />,
+  },
+];
 
 const blockTypeToBlockName = {
   bullet: "Bulleted List",
@@ -149,11 +266,6 @@ const FONT_SIZE_OPTIONS: [string, string][] = [
   ["20px", "20px"],
 ];
 
-function dropDownActiveClass(active: boolean) {
-  if (active) return "active dropdown-item-active";
-  else return "";
-}
-
 function BlockFormatDropDown({
   editor,
   blockType,
@@ -191,8 +303,6 @@ function BlockFormatDropDown({
   };
 
   const formatBulletList = () => {
-    console.log("clicked");
-
     if (blockType !== "bullet") {
       editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined);
     } else {
@@ -393,32 +503,26 @@ function FontDropDown({
       : "Formatting options for font size";
 
   return (
-    <Dropdown
+    <Select
       disabled={disabled}
-      button={
-        <button
-          className="button"
-          disabled={disabled}
-          aria-label={buttonAriaLabel}
-        >
-          {" "}
-        </button>
-      }
-    >
-      {(style === "font-family" ? FONT_FAMILY_OPTIONS : FONT_SIZE_OPTIONS).map(
-        ([option, text]) => (
-          <MenuItem
-            className={`item ${dropDownActiveClass(value === option)} ${
-              style === "font-size" ? "fontsize-item" : ""
-            }`}
-            onClick={() => handleClick(option)}
-            key={option}
-          >
-            {() => <span className="text">{text}</span>}
-          </MenuItem>
+      options={(style === "font-family"
+        ? FONT_FAMILY_OPTIONS
+        : FONT_SIZE_OPTIONS
+      ).map(([option, text]) => ({
+        value: option,
+        label: text,
+      }))}
+      selected={value}
+      setSelected={handleClick}
+      dropdownClass={cn("w-fit max-h-fit p-1")}
+      listboxClass={cn("py-2 rounded-md cursor-pointer")}
+      selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+      leftIcon={
+        style === "font-family" && (
+          <span className="text-base text-gray-400">T</span>
         )
-      )}
-    </Dropdown>
+      }
+    />
   );
 }
 
@@ -656,7 +760,7 @@ export default function ToolbarPlugin(): JSX.Element {
   //   };
 
   return (
-    <div className="relative z-10 flex space-x-1 border-b border-gray-200 p-1">
+    <div className="relative z-10 flex space-x-1 border-b border-gray-200 p-1 ">
       <div className="flex flex-row items-center space-x-1">
         <button
           disabled={!canUndo || !isEditable}
@@ -743,44 +847,53 @@ export default function ToolbarPlugin(): JSX.Element {
             onClick={() => {
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
             }}
-            className={"toolbar-item spaced " + (isBold ? "active" : "")}
+            className={cn(
+              "h-9 w-9 rounded-lg  text-center font-bold text-gray-400 transition-colors duration-200 ease-in-out hover:bg-gray-200 hover:text-gray-800",
+              isBold ? "bg-gray-200 text-gray-800" : "bg-transparent"
+            )}
             title={IS_APPLE ? "Bold (⌘B)" : "Bold (Ctrl+B)"}
             type="button"
             aria-label={`Format text as bold. Shortcut: ${
               IS_APPLE ? "⌘B" : "Ctrl+B"
             }`}
           >
-            <i className="format bold" />
+            B
           </button>
           <button
             disabled={!isEditable}
             onClick={() => {
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
             }}
-            className={"toolbar-item spaced " + (isItalic ? "active" : "")}
+            className={cn(
+              "h-9 w-9 rounded-lg  text-center italic text-gray-400 transition-colors duration-200 ease-in-out hover:bg-gray-200 hover:text-gray-800",
+              isItalic ? "bg-gray-200 text-gray-800" : "bg-transparent"
+            )}
             title={IS_APPLE ? "Italic (⌘I)" : "Italic (Ctrl+I)"}
             type="button"
             aria-label={`Format text as italics. Shortcut: ${
               IS_APPLE ? "⌘I" : "Ctrl+I"
             }`}
           >
-            <i className="format italic" />
+            I
           </button>
           <button
             disabled={!isEditable}
             onClick={() => {
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
             }}
-            className={"toolbar-item spaced " + (isUnderline ? "active" : "")}
+            className={cn(
+              "h-9 w-9  rounded-lg text-center text-gray-400 underline transition-colors duration-200 ease-in-out hover:bg-gray-200 hover:text-gray-800",
+              isUnderline ? "bg-gray-200 text-gray-800" : "bg-transparent"
+            )}
             title={IS_APPLE ? "Underline (⌘U)" : "Underline (Ctrl+U)"}
             type="button"
             aria-label={`Format text to underlined. Shortcut: ${
               IS_APPLE ? "⌘U" : "Ctrl+U"
             }`}
           >
-            <i className="format underline" />
+            U
           </button>
-          <button
+          {/* <button
             disabled={!isEditable}
             onClick={() => {
               activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
@@ -789,9 +902,7 @@ export default function ToolbarPlugin(): JSX.Element {
             title="Insert code block"
             type="button"
             aria-label="Insert code block"
-          >
-            <i className="format code" />
-          </button>
+          ></button>
           <button
             disabled={!isEditable}
             onClick={insertLink}
@@ -801,7 +912,7 @@ export default function ToolbarPlugin(): JSX.Element {
             type="button"
           >
             <i className="format link" />
-          </button>
+          </button> */}
           {/* <ColorPicker
             disabled={!isEditable}
             buttonClassName="toolbar-item color-picker"
@@ -882,225 +993,73 @@ export default function ToolbarPlugin(): JSX.Element {
               <Divider />
             </>
           )}
-          {/* <DropDown
+          <Select
             disabled={!isEditable}
-            buttonClassName="toolbar-item spaced"
-            buttonLabel="Insert"
-            buttonAriaLabel="Insert specialized editor node"
-            buttonIconClassName="icon plus"
-          >
-            <DropDownItem
-              onClick={() => {
-                activeEditor.dispatchCommand(
-                  INSERT_HORIZONTAL_RULE_COMMAND,
-                  undefined
-                );
-              }}
-              className="item"
-            >
-              <i className="icon horizontal-rule" />
-              <span className="text">Horizontal Rule</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
+            options={InsertTypes}
+            dropdownClass={cn("w-fit max-h-fit p-1")}
+            listboxClass={cn("py-2 rounded-md cursor-pointer")}
+            selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+            selected={""}
+            leftIcon={
+              <PlusIcon className="h-5 w-5 text-gray-800" aria-hidden="true" />
+            }
+            placeholder="Insert"
+            setSelected={(value) => {
+              if (value === "table") {
+                showModal("Insert Table", (onClose) => (
+                  // <InsertTableDialog
+                  //   activeEditor={activeEditor}
+                  //   onClose={onClose}
+                  // />
+                  <></>
+                ));
+              } else if (value === "image") {
                 showModal("Insert Image", (onClose) => (
                   <InsertImageDialog
                     activeEditor={activeEditor}
                     onClose={onClose}
                   />
                 ));
-              }}
-              className="item"
-            >
-              <i className="icon image" />
-              <span className="text">Image</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() =>
-                insertGifOnClick({
-                  altText: "Cat typing on a laptop",
-                  src: catTypingGif,
-                })
-              }
-              className="item"
-            >
-              <i className="icon gif" />
-              <span className="text">GIF</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
+              } else if (value === "horizontalRule") {
                 activeEditor.dispatchCommand(
-                  INSERT_EXCALIDRAW_COMMAND,
+                  INSERT_HORIZONTAL_RULE_COMMAND,
                   undefined
                 );
-              }}
-              className="item"
-            >
-              <i className="icon diagram-2" />
-              <span className="text">Excalidraw</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                showModal("Insert Table", (onClose) => (
-                  <InsertTableDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
-              }}
-              className="item"
-            >
-              <i className="icon table" />
-              <span className="text">Table</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                showModal("Insert Table", (onClose) => (
-                  <InsertNewTableDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
-              }}
-              className="item"
-            >
-              <i className="icon table" />
-              <span className="text">Table (Experimental)</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                showModal("Insert Poll", (onClose) => (
-                  <InsertPollDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
-              }}
-              className="item"
-            >
-              <i className="icon poll" />
-              <span className="text">Poll</span>
-            </DropDownItem>
-
-            <DropDownItem
-              onClick={() => {
-                showModal("Insert Equation", (onClose) => (
-                  <InsertEquationDialog
-                    activeEditor={activeEditor}
-                    onClose={onClose}
-                  />
-                ));
-              }}
-              className="item"
-            >
-              <i className="icon equation" />
-              <span className="text">Equation</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                editor.update(() => {
-                  const root = $getRoot();
-                  const stickyNode = $createStickyNode(0, 0);
-                  root.append(stickyNode);
-                });
-              }}
-              className="item"
-            >
-              <i className="icon sticky" />
-              <span className="text">Sticky Note</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                editor.dispatchCommand(INSERT_COLLAPSIBLE_COMMAND, undefined);
-              }}
-              className="item"
-            >
-              <i className="icon caret-right" />
-              <span className="text">Collapsible container</span>
-            </DropDownItem>
-            {EmbedConfigs.map((embedConfig) => (
-              <DropDownItem
-                key={embedConfig.type}
-                onClick={() => {
-                  activeEditor.dispatchCommand(
-                    INSERT_EMBED_COMMAND,
-                    embedConfig.type
-                  );
-                }}
-                className="item"
-              >
-                {embedConfig.icon}
-                <span className="text">{embedConfig.contentName}</span>
-              </DropDownItem>
-            ))}
-          </DropDown> */}
+              }
+            }}
+          />
         </>
       )}
       <Divider />
-      {/* <DropDown
+      <Select
         disabled={!isEditable}
-        buttonLabel="Align"
-        buttonIconClassName="icon left-align"
-        buttonClassName="toolbar-item spaced alignment"
-        buttonAriaLabel="Formatting options for text alignment"
-      >
-        <DropDownItem
-          onClick={() => {
-            activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
-          }}
-          className="item"
-        >
-          <i className="icon left-align" />
-          <span className="text">Left Align</span>
-        </DropDownItem>
-        <DropDownItem
-          onClick={() => {
-            activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "center");
-          }}
-          className="item"
-        >
-          <i className="icon center-align" />
-          <span className="text">Center Align</span>
-        </DropDownItem>
-        <DropDownItem
-          onClick={() => {
-            activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "right");
-          }}
-          className="item"
-        >
-          <i className="icon right-align" />
-          <span className="text">Right Align</span>
-        </DropDownItem>
-        <DropDownItem
-          onClick={() => {
-            activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "justify");
-          }}
-          className="item"
-        >
-          <i className="icon justify-align" />
-          <span className="text">Justify Align</span>
-        </DropDownItem>
-        <Divider />
-        <DropDownItem
-          onClick={() => {
+        options={AlignTypes}
+        selected={""}
+        placeholder="Align"
+        setSelected={(value) => {
+          if (value === "outdent") {
             activeEditor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
-          }}
-          className="item"
-        >
-          <i className={"icon " + (isRTL ? "indent" : "outdent")} />
-          <span className="text">Outdent</span>
-        </DropDownItem>
-        <DropDownItem
-          onClick={() => {
+            return;
+          }
+          if (value === "indent") {
             activeEditor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
-          }}
-          className="item"
-        >
-          <i className={"icon " + (isRTL ? "outdent" : "indent")} />
-          <span className="text">Indent</span>
-        </DropDownItem>
-      </DropDown> */}
+            return;
+          }
 
+          activeEditor.dispatchCommand(FORMAT_ELEMENT_COMMAND, value);
+        }}
+        dropdownClass={cn("w-fit max-h-fit p-1")}
+        listboxClass={cn("py-2 rounded-md cursor-pointer")}
+        selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+        leftIcon={
+          <i
+            className="h-4 w-4 text-gray-500"
+            style={{
+              backgroundImage: "url(/assets/text-left.svg)",
+            }}
+          />
+        }
+      />
       {modal}
     </div>
   );

@@ -18,7 +18,7 @@ import { CollapsibleTitleNode } from "~/components/Editor/plugins/CollapsiblePlu
 // import { EquationNode } from "./EquationNode";
 // import { ExcalidrawNode } from "./ExcalidrawNode";
 // import { FigmaNode } from "./FigmaNode";
-// import { ImageNode } from "./ImageNode";
+import { ImageNode } from "./ImageNode";
 // import { KeywordNode } from "./KeywordNode";
 
 // import { TableNode as NewTableNode } from "./TableNode";
@@ -40,7 +40,7 @@ const PlaygroundNodes: Klass<LexicalNode>[] = [
   OverflowNode,
   //   PollNode,
   //   StickyNode,
-  //   ImageNode,
+  ImageNode,
   //   MentionNode,
   //   EmojiNode,
   //   ExcalidrawNode,

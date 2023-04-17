@@ -4,16 +4,16 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/utils";
 import React from "react";
 
-type Option = {
+type Option<T extends string | number> = {
   label: string;
-  value: string;
+  value: T;
   icon?: React.ReactNode;
 };
 
-type SelectProps = {
-  options: Option[];
+type SelectProps<T extends string | number> = {
+  options: Option<T>[];
   selected: string | null;
-  setSelected: (val: string) => void;
+  setSelected: (val: T) => void;
   disabled?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -22,22 +22,23 @@ type SelectProps = {
   showValue?: boolean;
   dropdownClass?: string;
   listboxClass?: string;
+  placeholder?: string;
 };
 
-export default function Select({
+export default function Select<T extends string | number>({
   options,
   selected,
   setSelected,
   showValue = true,
   ...props
-}: SelectProps) {
+}: SelectProps<T>) {
   const selectedOption = React.useMemo(
     () => options.find((option) => option.value === selected),
     [options, selected]
   );
 
   return (
-    <Listbox value={selected} onChange={setSelected}>
+    <Listbox value={selected} onChange={(T) => setSelected(T as T)}>
       <div className="relative">
         <Listbox.Button
           className={cn(
@@ -75,7 +76,7 @@ export default function Select({
                 !selectedOption?.label && "text-gray-400"
               )}
             >
-              {selectedOption?.label ?? "Select an option"}
+              {selectedOption?.label ?? props.placeholder ?? "Select an option"}
             </span>
           )}
           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">

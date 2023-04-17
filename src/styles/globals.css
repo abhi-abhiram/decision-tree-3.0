@@ -21,7 +21,7 @@
   width: 16px;
   height: 16px;
   opacity: 0.3;
-  background-image: url(/assets/draggable-block-menu.a5121e96.svg);
+  background-image: url(/assets/draggable-block-menu.svg);
 }
 
 .draggable-block-menu:active {
@@ -41,4 +41,8 @@
   top: 0;
   opacity: 0;
   will-change: transform;
+}
+
+hr {
+  @apply my-2 border-transparent p-0.5 after:-mt-[1px] after:block after:h-0.5 after:bg-gray-400 after:content-[''];
 }
