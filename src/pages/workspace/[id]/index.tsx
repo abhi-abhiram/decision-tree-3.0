@@ -1,5 +1,7 @@
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { ChevronDoubleRightIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronDoubleRightIcon,
+  DocumentIcon,
+} from "@heroicons/react/24/outline";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";
@@ -13,6 +15,13 @@ import { Nav } from "../..";
 import Link from "next/link";
 import Modal from "~/components/ui/Model";
 import { Textinput } from "~/components/ui/Textinput";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  FolderIcon,
+  FolderOpenIcon,
+} from "@heroicons/react/20/solid";
+import { Transition } from "@headlessui/react";
 
 const data = [
   {
@@ -223,40 +232,36 @@ export default function Workspace() {
                   <Button>Button</Button>
                 </div>
               </div>
-              <div className="sticky top-0 flex flex-row items-center py-3  text-sm font-medium text-gray-500 [&>*]:px-3">
+              <div className="sticky top-0 flex flex-row items-center py-3  text-xs font-medium text-gray-500 [&>*]:px-3">
                 <div className="w-1/2">Name</div>
                 <div className="grow">Created</div>
                 <div className="grow">Updated</div>
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col gap-2 overflow-auto text-left text-sm text-gray-900">
-              {data.map((item) => (
+            <div className="flex flex-1 flex-col overflow-auto text-left text-xs text-gray-900">
+              {data.map((item, index) => (
                 <div
-                  className="group flex cursor-pointer flex-row items-center rounded-xl bg-gray-200 bg-opacity-50 py-3 font-medium shadow-sm transition-colors
-                  duration-200 ease-in-out hover:bg-gray-300 hover:bg-opacity-60 [&>*]:px-3
-                  "
+                  className={cn(
+                    "group flex cursor-pointer flex-row items-center rounded-md bg-opacity-50 py-2   font-medium transition-colors duration-200 ease-in-out ",
+                    index % 2 === 0 ? "" : "bg-gray-200"
+                  )}
                   key={item.name}
                 >
-                  <div className="relative w-1/2">
-                    {item.name}
-                    <div className="invisible absolute top-1/2 right-0 flex -translate-y-1/2 gap-1 group-hover:visible">
-                      <button
-                        className="rounded-md p-1 text-blue-600 transition-transform duration-200 ease-in-out hover:scale-110
-                        hover:bg-blue-100 hover:shadow-sm 
-                        "
-                      >
-                        <PencilSquareIcon className="h-5 w-5" />
-                      </button>
-                      <button className="hover:text-red- rounded-md p-1 text-red-600 transition-transform duration-200 ease-in-out hover:scale-110 hover:bg-red-100 hover:shadow-sm">
-                        <TrashIcon className="h-5 w-5" />
-                      </button>
-                    </div>
+                  <div className="flex w-1/2 items-center gap-1 px-4">
+                    <DocumentIcon className="h-4 w-4 text-gray-500" />
+                    <p>{item.name}</p>
                   </div>
-                  <div className="grow">{item.created}</div>
-                  <div className="grow">{item.updated}</div>
+                  <div className="grow px-4">{item.created}</div>
+                  <div className="grow px-4">{item.updated}</div>
                 </div>
               ))}
+              <Folder
+                id="1"
+                name="Folder 1"
+                created="1/1/2021"
+                updated="1/1/2021"
+              />
             </div>
           </div>
         </Main>
@@ -276,3 +281,77 @@ export default function Workspace() {
     </Layout>
   );
 }
+
+const Folder = ({
+  id,
+  name,
+  created,
+  updated,
+  indent = 0,
+}: {
+  id: string;
+  name: string;
+  created: string;
+  updated: string;
+  indent?: number;
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  return (
+    <>
+      <div
+        className=" group flex cursor-pointer flex-row items-center rounded-md bg-opacity-50  
+         py-2 font-medium transition-colors duration-200 ease-in-out"
+        onClick={() => {
+          setIsOpen(!isOpen);
+        }}
+      >
+        <div
+          className={cn("flex w-1/2 items-center gap-1")}
+          style={
+            indent > 0
+              ? {
+                  paddingLeft: `${indent * 1.5}rem`,
+                }
+              : {}
+          }
+        >
+          <div className="flex">
+            {isOpen ? (
+              <>
+                <ChevronDownIcon className="h-4 w-4 text-gray-500" />
+                <FolderOpenIcon className="h-4 w-4 text-gray-500" />
+              </>
+            ) : (
+              <>
+                <ChevronRightIcon className="h-4 w-4 text-gray-500" />
+                <FolderIcon className="h-4 w-4 text-gray-500" />
+              </>
+            )}
+          </div>
+          <p>{name}</p>
+        </div>
+        <div className="grow px-4">{created}</div>
+        <div className="grow px-4">{updated}</div>
+      </div>
+      {isOpen && (
+        <>
+          <Folder
+            id="1"
+            name="Folder 1"
+            created="1/1/2021"
+            updated="1/1/2021"
+            indent={indent + 1}
+          />
+          <Folder
+            id="1"
+            name="Folder 1"
+            created="1/1/2021"
+            updated="1/1/2021"
+            indent={indent + 1}
+          />
+        </>
+      )}
+    </>
+  );
+};

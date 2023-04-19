@@ -64,7 +64,7 @@ export function Nav({
             </button>
           </div>
         </div>
-        <div className=" bg-white px-3">
+        <div className="bg-white px-3">
           <Textinput
             leftIcon={<MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />}
             placeholder="Search"

@@ -72,6 +72,7 @@ export interface TextinputProps
   leftIconLoading?: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const Textinput = React.forwardRef<HTMLInputElement, TextinputProps>(
   (
     {
