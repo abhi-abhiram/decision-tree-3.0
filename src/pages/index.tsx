@@ -11,15 +11,32 @@ import React from "react";
 import { useRouter } from "next/router";
 import { cn } from "~/utils";
 import { Main } from "~/components/ui/Main";
+import { Button } from "~/components/ui/Button";
+import Modal from "~/components/ui/Model";
+import { api } from "~/utils/api";
+import { type Workspace } from "@prisma/client";
 
-const data = [
-  { label: "Name 1", value: "1" },
-  { label: "Name 2", value: "2" },
-  { label: "Name 3", value: "3" },
-  { label: "Name 4", value: "4" },
-  { label: "Name 5", value: "5" },
-  { label: "Name 6", value: "6" },
-];
+const WorkspacesLinks = ({ workspaces }: { workspaces: Workspace[] }) => {
+  const router = useRouter();
+
+  return (
+    <>
+      {workspaces.map((val) => (
+        <Link
+          href={`/workspace/${val.id}`}
+          className={cn(
+            " px-6 py-3 transition-colors duration-200 ease-in-out hover:bg-blue-50 hover:text-blue-600",
+            router.query.id === val.id &&
+              "bg-blue-50 bg-opacity-75 text-blue-600 hover:bg-blue-50 hover:bg-opacity-75"
+          )}
+          key={val.id}
+        >
+          {val.name}
+        </Link>
+      ))}
+    </>
+  );
+};
 
 export function Nav({
   isShowing,
@@ -30,17 +47,17 @@ export function Nav({
 }) {
   const [query, setQuery] = React.useState("");
 
-  const filtereddata =
+  const { data } = api.workspace.workspaces.useQuery();
+
+  const workspaces =
     query === ""
       ? data
-      : data.filter((data) =>
-          data.label
+      : data?.filter((data) =>
+          data.name
             .toLowerCase()
             .replace(/\s+/g, "")
             .includes(query.toLowerCase().replace(/\s+/g, ""))
         );
-
-  const router = useRouter();
 
   return (
     <nav
@@ -75,21 +92,62 @@ export function Nav({
         <div className="h-5"></div>
       </div>
       <div className="mb-4 flex flex-col text-gray-600 ">
-        {filtereddata.map((val) => (
-          <Link
-            href={`/workspace/${val.value}`}
-            className={cn(
-              " px-6 py-3 transition-colors duration-200 ease-in-out hover:bg-blue-50 hover:text-blue-600",
-              router.query.id === val.value &&
-                "bg-blue-50 bg-opacity-75 text-blue-600 hover:bg-blue-50 hover:bg-opacity-75"
-            )}
-            key={val.value}
-          >
-            {val.label}
-          </Link>
-        ))}
+        <WorkspacesLinks workspaces={workspaces ?? []} />
       </div>
     </nav>
+  );
+}
+
+export function CreateWorkspace() {
+  const [isShowing, setIsShowing] = React.useState(false);
+  const initialFocusRef = React.useRef(null);
+
+  const { mutateAsync, isLoading } = api.workspace.create.useMutation();
+  const [name, setName] = React.useState("");
+
+  return (
+    <>
+      <Button onClick={() => setIsShowing(true)}>Create Workspace</Button>
+      <Modal
+        title="Create Workspace"
+        isOpen={isShowing}
+        setIsOpen={() => setIsShowing(false)}
+        initialFocus={initialFocusRef}
+      >
+        <form
+          onSubmit={(e) => {
+            const handler = async () => {
+              e.preventDefault();
+              await mutateAsync({ name });
+              setIsShowing(false);
+            };
+
+            void handler();
+          }}
+        >
+          <div className="my-1">
+            <Textinput
+              placeholder="Workspace Name"
+              ref={initialFocusRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end space-x-1">
+            <Button type="submit" isloading={isLoading}>
+              Create
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setIsShowing(false)}
+              variant="secondary"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </>
   );
 }
 
@@ -122,7 +180,21 @@ export default function Home() {
       </header>
       <div className="flex flex-1 overflow-hidden">
         <Nav isShowing={isShowing} setIsShowing={setIsShowing} />
-        <Main></Main>
+        <Main>
+          <div className="flex h-full items-center justify-center">
+            <div>
+              <div className="mb-4 text-center text-2xl text-gray-600">
+                Welcome!
+              </div>
+              <div className="mb-4 text-center text-gray-600">
+                Create a workspace to get started
+              </div>
+              <div className="flex justify-center">
+                <CreateWorkspace />
+              </div>
+            </div>
+          </div>
+        </Main>
       </div>
     </Layout>
   );

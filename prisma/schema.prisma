@@ -11,11 +11,12 @@ datasource db {
 }
 
 model Workspace {
-    id        Int      @id @default(autoincrement())
+    id        String   @id @default(cuid())
     name      String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     trees     Tree[]
+    folders   Folder[]
 }
 
 model Tree {
@@ -23,9 +24,10 @@ model Tree {
     name        String
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
-    workspaceId Int
+    workspaceId String
     workspace   Workspace @relation(fields: [workspaceId], references: [id])
     nodes       Node[]
+    folders     Folder[]
 }
 
 model Node {
@@ -38,4 +40,17 @@ model Node {
     parentId  String?
     parent    Node?    @relation("ParentChild", fields: [parentId], references: [id])
     children  Node[]   @relation("ParentChild")
+}
+
+model Folder {
+    id          String    @id @default(cuid())
+    name        String
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    parentId    String?
+    parent      Folder?   @relation("ParentChild", fields: [parentId], references: [id])
+    children    Folder[]  @relation("ParentChild")
+    trees       Tree[]
+    Workspace   Workspace @relation(fields: [workspaceId], references: [id])
+    workspaceId String
 }

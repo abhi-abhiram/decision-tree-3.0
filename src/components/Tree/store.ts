@@ -1,19 +1,19 @@
 import { create } from "zustand";
 import {
-  Connection,
-  Edge,
-  EdgeChange,
-  Node as ReactFlowNode,
-  NodeChange,
+  type Connection,
+  type Edge,
+  type EdgeChange,
+  type Node as ReactFlowNode,
+  type NodeChange,
   addEdge,
-  OnNodesChange,
-  OnEdgesChange,
-  OnConnect,
+  type OnNodesChange,
+  type OnEdgesChange,
+  type OnConnect,
   applyNodeChanges,
   applyEdgeChanges,
 } from "reactflow";
 // import { getTreeLayout } from "./Node";
-import { Node as CustomNode } from "@prisma/client";
+import { type Node as CustomNode } from "@prisma/client";
 import { createId } from "@paralleldrive/cuid2";
 import * as d3 from "d3-hierarchy";
 
@@ -159,7 +159,7 @@ export function getTreeLayout<
 
   const resultEdges: Edge<T>[] = [];
 
-  var root = d3
+  const root = d3
     .stratify<(typeof nodes)[number]>()
     .id(function (d) {
       return d.id;
