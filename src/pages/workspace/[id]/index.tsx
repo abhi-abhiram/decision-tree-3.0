@@ -26,6 +26,8 @@ import { api } from "~/utils/api";
 import moment from "moment";
 import { Folder, type Tree } from "@prisma/client";
 import useWorkspaceStore from "~/store/workspace";
+import AddTree from "~/components/workspace/AddTree";
+import AddFolder from "~/components/workspace/AddFolder";
 
 function DeleteWorkspace({
   isOpen,
@@ -453,28 +455,26 @@ const File = ({
   );
 };
 
-import { prisma } from "~/server/db";
-import { appRouter } from "~/server/api/root";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import superjson from "superjson";
-import { type GetServerSideProps } from "next";
-import AddTree from "~/components/workspace/AddTree";
-import AddFolder from "~/components/workspace/AddFolder";
+// import { prisma } from "~/server/db";
+// import { appRouter } from "~/server/api/root";
+// import { createServerSideHelpers } from "@trpc/react-query/server";
+// import superjson from "superjson";
+// import { type GetServerSideProps } from "next";
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const ssg = createServerSideHelpers({
-    router: appRouter,
-    ctx: { prisma },
-    transformer: superjson,
-  });
+// export const getServerSideProps: GetServerSideProps = async (ctx) => {
+//   const ssg = createServerSideHelpers({
+//     router: appRouter,
+//     ctx: { prisma },
+//     transformer: superjson,
+//   });
 
-  const workspaceId = ctx.query.id as string;
+//   const workspaceId = ctx.query.id as string;
 
-  await ssg.workspace.getWorkspace.prefetch({ workspaceId });
+//   await ssg.workspace.getWorkspace.prefetch({ workspaceId });
 
-  return {
-    props: {
-      trpcState: ssg.dehydrate(),
-    },
-  };
-};
+//   return {
+//     props: {
+//       trpcState: ssg.dehydrate(),
+//     },
+//   };
+// };
