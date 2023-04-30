@@ -67,8 +67,20 @@ export const workspaceRouter = createTRPCRouter({
 
         return {
             foldersAndTrees: foldersAndTrees as (Folder | Tree)[],
-            workspace: workspace
         }
     }),
+
+    getWorkspace: publicProcedure.input(z.object({
+        workspaceId: z.string(),
+    })).query(async ({ ctx, input }) => {
+        const workspace = await ctx.prisma.workspace.findUnique({
+            where: {
+                id: input.workspaceId
+            }
+        })
+
+        return workspace
+    }
+    ),
 
 })

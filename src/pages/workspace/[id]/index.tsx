@@ -4,7 +4,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React from "react";
 import { Button } from "~/components/ui/Button";
 import { Dropdown, MenuGroup, MenuItem } from "~/components/ui/Dropdown";
 import Layout from "~/components/ui/Layout";
@@ -19,12 +19,12 @@ import {
   ChevronRightIcon,
   FolderIcon,
   FolderOpenIcon,
+  FolderPlusIcon,
 } from "@heroicons/react/20/solid";
 import { ContextMenu } from "~/components/ui/ContextMenu";
 import { api } from "~/utils/api";
 import moment from "moment";
 import { Folder, type Tree } from "@prisma/client";
-import useModal from "~/hooks/useModal";
 import useWorkspaceStore from "~/store/workspace";
 
 function DeleteWorkspace({
@@ -116,17 +116,24 @@ export default function Workspace() {
       enabled: !!router.query.id,
     }
   );
-
+  const { data: workspaceData } = api.workspace.getWorkspace.useQuery(
+    {
+      workspaceId: router.query.id as string,
+    },
+    {
+      enabled: !!router.query.id,
+    }
+  );
   const { workspace, setWorksapce } = useWorkspaceStore((state) => ({
     workspace: state.workspace,
     setWorksapce: state.setWorkspace,
   }));
 
-  useEffect(() => {
-    if (data?.workspace) {
-      setWorksapce(data.workspace);
+  React.useEffect(() => {
+    if (workspaceData) {
+      setWorksapce(workspaceData);
     }
-  }, [data]);
+  }, [workspaceData]);
 
   return (
     <Layout>
@@ -167,7 +174,12 @@ export default function Workspace() {
             <div className="sticky top-0">
               <div>
                 <div className="flex items-center gap-1">
-                  <h1 className="text-2xl font-medium">{workspace?.name}</h1>
+                  {workspace.name && (
+                    <h1 className="text-2xl font-medium">{workspace.name}</h1>
+                  )}
+                  {!workspace.name && (
+                    <div className="h-8 w-24 animate-pulse rounded bg-gray-200"></div>
+                  )}
                   <Dropdown
                     button={
                       <button className="rounded-md p-1 text-gray-500 hover:bg-gray-200 hover:bg-opacity-70 hover:text-gray-500">
@@ -204,7 +216,8 @@ export default function Workspace() {
               <div className="flex justify-between border-b border-gray-200 py-2">
                 <div></div>
                 <div className="flex self-end">
-                  <Add />
+                  <AddTree />
+                  <AddFolder />
                 </div>
               </div>
               <div className="sticky top-0 flex flex-row items-center py-3  text-xs font-medium text-gray-500 [&>*]:px-3">
@@ -213,7 +226,6 @@ export default function Workspace() {
                 <div className="grow">Updated</div>
               </div>
             </div>
-
             <div className="flex flex-1 flex-col overflow-auto text-left text-xs text-gray-900 ">
               <Folders data={data?.foldersAndTrees ?? []} />
             </div>
@@ -363,46 +375,14 @@ const Folders = ({
               indent={indent}
             />
           ) : (
-            <div
-              className={cn(
-                "group flex cursor-pointer flex-row items-center rounded-md py-2 font-medium transition-colors duration-200 ease-in-out odd:bg-gray-200 odd:bg-opacity-60"
-              )}
+            <File
+              created={val.createdAt}
+              updated={val.updatedAt}
+              name={val.name}
+              id={val.id}
               key={val.id}
-              // onContextMenu={(e) => {
-              //   e.preventDefault();
-              //   setContextMenuShowing({
-              //     isShowing: true,
-              //     x: e.clientX,
-              //     y: e.clientY,
-              //   });
-              // }}
-              onClick={() => {
-                setSelected({
-                  id: val.id,
-                  type: "tree",
-                });
-              }}
-            >
-              <div
-                className="flex w-1/2 items-center gap-1 pl-7"
-                style={
-                  indent > 0
-                    ? {
-                        paddingLeft: `${indent * 1.5}rem`,
-                      }
-                    : {}
-                }
-              >
-                <DocumentIcon className="h-4 w-4 text-gray-500" />
-                <p>{val.name}</p>
-              </div>
-              <div className="grow px-4">
-                {moment(val.createdAt).format("MM/DD/YYYY")}
-              </div>
-              <div className="grow px-4">
-                {moment(val.updatedAt).format("MM/DD/YYYY")}
-              </div>
-            </div>
+              indent={indent}
+            />
           )}
         </React.Fragment>
       ))}
@@ -410,135 +390,91 @@ const Folders = ({
   );
 };
 
-const AddFolder = ({ onClose }: { onClose: () => void }) => {
-  const { mutateAsync, isLoading } = api.folder.create.useMutation();
-  const [name, setName] = React.useState("");
-  const router = useRouter();
-  const initialFocusRef = React.useRef<HTMLInputElement>(null);
-  const { selected } = useWorkspaceStore((state) => ({
+const File = ({
+  id,
+  name,
+  created,
+  updated,
+  indent = 0,
+}: {
+  id: string;
+  name: string;
+  created: Date;
+  updated: Date;
+  indent?: number;
+}) => {
+  const { setSelected, selected } = useWorkspaceStore((state) => ({
+    setSelected: state.setSelected,
     selected: state.selected,
   }));
 
   return (
-    <form
-      onSubmit={(e) => {
-        const handler = async () => {
-          e.preventDefault();
-          const parentId = selected?.id ?? undefined;
-          await mutateAsync({
-            name,
-            workspaceId: router.query.id as string,
-            parentId,
-          });
-          onClose();
-        };
+    <div
+      className={cn(
+        "group flex flex-row items-center rounded-md  py-2 font-medium transition-colors duration-200 ease-in-out odd:bg-gray-200 odd:bg-opacity-60",
+        selected?.id === id &&
+          "bg-blue-500 text-white odd:bg-blue-500 odd:bg-opacity-100"
+      )}
+      onClick={() => {
+        setSelected({
+          id: id,
+          type: "tree",
+        });
 
-        void handler();
-      }}
-    >
-      <div className="my-1">
-        <Textinput
-          placeholder="Folder Name"
-          ref={initialFocusRef}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-      <div className="flex justify-end space-x-1">
-        <Button type="submit" isloading={isLoading}>
-          Create
-        </Button>
-        <Button type="button" onClick={() => onClose()} variant="secondary">
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
-};
-
-const AddTree = ({ onClose }: { onClose: () => void }) => {
-  const { mutateAsync, isLoading } = api.tree.create.useMutation();
-  const [name, setName] = React.useState("");
-  const router = useRouter();
-  const initialFocusRef = React.useRef<HTMLInputElement>(null);
-  const { selected } = useWorkspaceStore((state) => ({
-    selected: state.selected,
-  }));
-
-  return (
-    <form
-      onSubmit={(e) => {
-        const handler = async () => {
-          e.preventDefault();
-
-          await mutateAsync({
-            name,
-            workspaceId: router.query.id as string,
-            folderId: selected?.type === "folder" ? selected.id : undefined,
-          });
-          onClose();
-        };
-
-        void handler();
-      }}
-    >
-      <div className="my-1">
-        <Textinput
-          placeholder="Tree Name"
-          ref={initialFocusRef}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-      </div>
-      <div className="flex justify-end space-x-1">
-        <Button type="submit" isloading={isLoading}>
-          Create
-        </Button>
-        <Button type="button" onClick={() => onClose()} variant="secondary">
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
-};
-
-const Add = () => {
-  const [modal, setModal] = useModal();
-
-  return (
-    <>
-      <Dropdown
-        button={
-          <button className="rounded-md p-1 text-gray-500 hover:bg-gray-200 hover:bg-opacity-70 hover:text-gray-500">
-            <EllipsisHorizontalIcon className="h-5 w-5" />
-          </button>
+        if (selected?.id === id) {
+          setSelected(null);
         }
-        className="right-0 z-10 w-36"
+      }}
+    >
+      <div
+        className={cn("flex w-1/2 items-center gap-1")}
+        style={
+          indent > 0
+            ? {
+                paddingLeft: `${indent * 1.25}rem`,
+              }
+            : {}
+        }
       >
-        <MenuGroup>
-          <MenuItem
-            onClick={() => {
-              setModal("Create Folder", (close) => (
-                <AddFolder onClose={close} />
-              ));
-            }}
-          >
-            {() => (
-              <>
-                <span>Create Folder</span>
-              </>
-            )}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setModal("Create Tree", (close) => <AddTree onClose={close} />);
-            }}
-          >
-            {() => <span>Create Tree</span>}
-          </MenuItem>
-        </MenuGroup>
-      </Dropdown>
-      {modal}
-    </>
+        <div
+          className={cn(
+            "flex gap-1 pl-2 text-gray-500",
+            selected?.id === id && "text-white"
+          )}
+        >
+          <div className="h-4 w-4"></div>
+          <DocumentIcon className="h-4 w-4" />
+        </div>
+        <p>{name}</p>
+      </div>
+      <div className="grow px-4">{moment(created).format("MM/DD/YYYY")}</div>
+      <div className="grow px-4">{moment(updated).format("MM/DD/YYYY")}</div>
+    </div>
   );
+};
+
+import { prisma } from "~/server/db";
+import { appRouter } from "~/server/api/root";
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import superjson from "superjson";
+import { type GetServerSideProps } from "next";
+import AddTree from "~/components/workspace/AddTree";
+import AddFolder from "~/components/workspace/AddFolder";
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const ssg = createServerSideHelpers({
+    router: appRouter,
+    ctx: { prisma },
+    transformer: superjson,
+  });
+
+  const workspaceId = ctx.query.id as string;
+
+  await ssg.workspace.getWorkspace.prefetch({ workspaceId });
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+    },
+  };
 };
