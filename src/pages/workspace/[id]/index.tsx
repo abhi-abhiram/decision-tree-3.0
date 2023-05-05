@@ -19,7 +19,6 @@ import {
   ChevronRightIcon,
   FolderIcon,
   FolderOpenIcon,
-  FolderPlusIcon,
 } from "@heroicons/react/20/solid";
 import { ContextMenu } from "~/components/ui/ContextMenu";
 import { api } from "~/utils/api";
@@ -104,11 +103,7 @@ export default function Workspace() {
   const [navShowing, setNavShowing] = React.useState(true);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [rename, setRename] = React.useState(false);
-  const [contextMenu, setContextMenuShowing] = React.useState({
-    isShowing: false,
-    x: 0,
-    y: 0,
-  });
+
   const [selected, setSelected] = React.useState<string[]>([]);
   const { data } = api.workspace.foldersAndTrees.useQuery(
     {
@@ -246,14 +241,6 @@ export default function Workspace() {
           setRename(false);
         }}
       />
-      <ContextMenu
-        isShowing={contextMenu.isShowing}
-        clientX={contextMenu.x}
-        clientY={contextMenu.y}
-        setShowing={(isShowing) => {
-          setContextMenuShowing({ ...contextMenu, isShowing });
-        }}
-      />
     </Layout>
   );
 }
@@ -264,12 +251,14 @@ const Folder = ({
   created,
   updated,
   indent = 0,
+  onContextMenu,
 }: {
   id: string;
   name: string;
   created: Date;
   updated: Date;
   indent?: number;
+  onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const data = api.folder.open.useQuery(
@@ -302,6 +291,7 @@ const Folder = ({
             setSelected(null);
           }
         }}
+        onContextMenu={onContextMenu}
       >
         <div
           className={cn("flex w-1/2 items-center gap-1")}
@@ -358,10 +348,15 @@ const Folders = ({
   data: (Folder | Tree)[];
   indent?: number;
 }) => {
-  const { setSelected, selected } = useWorkspaceStore((state) => ({
+  const { setSelected } = useWorkspaceStore((state) => ({
     setSelected: state.setSelected,
     selected: state.selected,
   }));
+  const [contextMenu, setContextMenuShowing] = React.useState({
+    isShowing: false,
+    x: 0,
+    y: 0,
+  });
 
   return (
     <>
@@ -375,6 +370,18 @@ const Folders = ({
               updated={val.updatedAt}
               key={val.id}
               indent={indent}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setContextMenuShowing({
+                  isShowing: true,
+                  x: e.clientX,
+                  y: e.clientY,
+                });
+                setSelected({
+                  id: val.id,
+                  type: "folder",
+                });
+              }}
             />
           ) : (
             <File
@@ -384,10 +391,30 @@ const Folders = ({
               id={val.id}
               key={val.id}
               indent={indent}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                setContextMenuShowing({
+                  isShowing: true,
+                  x: e.clientX,
+                  y: e.clientY,
+                });
+                setSelected({
+                  id: val.id,
+                  type: "tree",
+                });
+              }}
             />
           )}
         </React.Fragment>
       ))}
+      <ContextMenu
+        isShowing={contextMenu.isShowing}
+        clientX={contextMenu.x}
+        clientY={contextMenu.y}
+        setShowing={(isShowing) => {
+          setContextMenuShowing({ ...contextMenu, isShowing });
+        }}
+      />
     </>
   );
 };
@@ -398,12 +425,14 @@ const File = ({
   created,
   updated,
   indent = 0,
+  onContextMenu,
 }: {
   id: string;
   name: string;
   created: Date;
   updated: Date;
   indent?: number;
+  onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
   const { setSelected, selected } = useWorkspaceStore((state) => ({
     setSelected: state.setSelected,
@@ -427,6 +456,7 @@ const File = ({
           setSelected(null);
         }
       }}
+      onContextMenu={onContextMenu}
     >
       <div
         className={cn("flex w-1/2 items-center gap-1")}

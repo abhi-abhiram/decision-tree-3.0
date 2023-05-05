@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import ReactFlow, {
   Background,
-  EdgeTypes,
-  Node as ReactFlowNode,
+  type EdgeTypes,
+  type Node as ReactFlowNode,
   useReactFlow,
   SelectionMode,
 } from "reactflow";
 import CustomEdge, { ConnectionEdge } from "./Edge";
 import { TextUpdaterNode } from "./Node";
-import { Node as CustomNode } from "@prisma/client";
+import { type Node as CustomNode } from "@prisma/client";
 import { shallow } from "zustand/shallow";
-import useStore, { RFState } from "./store";
+import useStore, { type RFState } from "./store";
 import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/20/solid";
 
 const nodeTypes = { textUpdater: TextUpdaterNode };
@@ -35,18 +35,7 @@ export default function DisplayTree() {
 
   const [selectedNode, setSelectedNode] =
     React.useState<ReactFlowNode<CustomNode> | null>(null);
-  const { setViewport, setCenter, zoomTo, zoomIn, zoomOut, fitView } =
-    useReactFlow();
-
-  const [minZoom, setMinZoom] = useState<number | undefined>(5);
-
-  useEffect(() => {
-    zoomTo(1, {
-      duration: 500,
-    });
-
-    setMinZoom(undefined);
-  });
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   return (
     <div className="h-full">
@@ -60,18 +49,18 @@ export default function DisplayTree() {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         connectionLineComponent={ConnectionEdge}
-        fitView
         selectionMode={SelectionMode.Full}
-        onNodeClick={(e, node) => {}}
-        minZoom={minZoom}
-        maxZoom={10}
+        fitView
+        fitViewOptions={{
+          maxZoom: 1,
+        }}
       >
         <Background />
         <div className="absolute bottom-3 left-3 z-10 flex  transform rounded-md border border-gray-100 bg-white p-1.5 text-black shadow-sm">
           <button
             onClick={() => {
               zoomIn({
-                duration: 500,
+                duration: 200,
               });
             }}
             className="rounded-md p-1 transition-colors duration-200 ease-in-out hover:bg-gray-200"
@@ -81,7 +70,7 @@ export default function DisplayTree() {
           <button
             onClick={() => {
               zoomOut({
-                duration: 500,
+                duration: 200,
               });
             }}
             className="rounded-md p-1 transition-colors duration-200 ease-in-out hover:bg-gray-200"

@@ -8,6 +8,7 @@ const server = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
   OPENAI_API_KEY: z.string(),
+  UPLOADTHING_SECRET: z.string(),
 });
 
 /**
@@ -29,6 +30,7 @@ const processEnv = {
   NODE_ENV: process.env.NODE_ENV,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
 };
 
 // Don't touch the part below

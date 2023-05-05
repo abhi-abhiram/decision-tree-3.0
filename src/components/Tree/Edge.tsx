@@ -1,7 +1,7 @@
 import React from "react";
 import {
-  ConnectionLineComponentProps,
-  EdgeProps,
+  type ConnectionLineComponentProps,
+  type EdgeProps,
   getBezierPath,
 } from "reactflow";
 
@@ -14,7 +14,6 @@ export default function DefaultEdge({
   sourcePosition,
   targetPosition,
   style = {},
-  data,
   markerEnd,
 }: EdgeProps) {
   const [edgePath] = getBezierPath({

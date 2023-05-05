@@ -12,114 +12,77 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "reactflow";
-// import { getTreeLayout } from "./Node";
-import { type Node as CustomNode } from "@prisma/client";
-import { createId } from "@paralleldrive/cuid2";
+import { type Tree, type Node as CustomNode } from "@prisma/client";
 import * as d3 from "d3-hierarchy";
 
-const nodes: CustomNode[] = [
+
+const initialNodes: CustomNode[] = [
   {
     id: "1",
-    question:
-      "what is your name and your dad name and your mom name and etc etc what is your name and your dad name and your mom name and etc etc what is your name and your dad name and your mom name and etc etc what is your name and your dad name and your mom name and etc etc",
+    name: "Node 1",
     parentId: null,
+    type: "Date",
     createdAt: new Date(),
     updatedAt: new Date(),
+    question: "What is your name?",
     treeId: "1",
-  },
-  {
+  }, {
     id: "2",
-    question: "what is your age?",
+    name: "Node 2",
     parentId: "1",
+    type: "Date",
     createdAt: new Date(),
     updatedAt: new Date(),
+    question: "What is your name?",
     treeId: "1",
-  },
-  {
+  }, {
     id: "3",
-    question: "Seth",
+    name: "Node 3",
     parentId: "1",
+    type: "Date",
     createdAt: new Date(),
     updatedAt: new Date(),
+    question: "What is your name?",
     treeId: "1",
-  },
-  {
+  }, {
     id: "4",
-    question: "Enos",
-    parentId: "3",
+    name: "Node 4",
+    parentId: "2",
+    type: "Date",
     createdAt: new Date(),
     updatedAt: new Date(),
+    question: "What is your name?",
     treeId: "1",
-  },
-  {
-    id: "5",
-    question: "Noam",
-    parentId: "3",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    treeId: "1",
-  },
-  {
-    id: "6",
-    question: "Abel",
-    parentId: "1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    treeId: "1",
-  },
-  {
-    id: "7",
-    question: "Awan",
-    parentId: "1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    treeId: "1",
-  },
-  {
-    id: "8",
-    question: "Enoch",
-    parentId: "7",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    treeId: "1",
-  },
-  {
-    id: "9",
-    question: "Azura",
-    parentId: "1",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    treeId: "1",
-  },
+  }
 ];
 
-const [initialNodes, initialEdges] = getTreeLayout(nodes);
+const [testNode, testEdge] = getTreeLayout(initialNodes);
+
 
 export type RFState = {
-  nodes: typeof initialNodes;
-  edges: typeof initialEdges;
+  tree: Tree | null,
+  nodes: ReactFlowNode<CustomNode>[];
+  edges: Edge[];
+  selectedNode: ReactFlowNode<CustomNode> | null;
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
-  addNode: (parentNode: CustomNode) => void;
+  addNode: (newNode: CustomNode) => void;
+  setNodesAndEdges: (nodes: CustomNode[]) => void;
   onConnect: OnConnect;
+  deleteNode: (nodeId: string) => void;
+  editNode: (editNode: CustomNode) => void;
+  setTree: (tree: Tree) => void;
+  setSelectedNode: (node: ReactFlowNode<CustomNode>) => void;
 };
 
 const useStore = create<RFState>((set, get) => ({
-  nodes: initialNodes,
-  edges: initialEdges,
-  addNode: (parentNode: CustomNode) => {
-    const newNode: CustomNode = {
-      id: createId(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      question: parentNode.question + "'s child",
-      parentId: parentNode.id,
-      treeId: parentNode.treeId,
-    };
+  tree: null,
+  nodes: testNode,
+  edges: testEdge,
+  selectedNode: null,
+  addNode: (newNode: CustomNode) => {
 
     const oldNodes: CustomNode[] = get().nodes.map((node) => {
-      if (node.id === parentNode.id) node.data.updatedAt = new Date();
-
       return {
         ...node.data,
       };
@@ -138,26 +101,78 @@ const useStore = create<RFState>((set, get) => ({
       nodes: applyNodeChanges(changes, get().nodes),
     });
   },
+
   onEdgesChange: (changes: EdgeChange[]) => {
     set({
       edges: applyEdgeChanges(changes, get().edges),
     });
   },
+
   onConnect: (connection: Connection) => {
     set({
       edges: addEdge(connection, get().edges),
     });
   },
+
+  setNodesAndEdges(nodes) {
+    const [newNodes, newEdges] = getTreeLayout(nodes);
+
+    set({
+      nodes: newNodes,
+      edges: newEdges,
+    });
+  },
+
+  deleteNode(nodeId) {
+    const oldNodes = get().nodes.map((node) => {
+
+      return {
+        ...node.data,
+      };
+    });
+
+    const [newNodes, newEdges] = getTreeLayout(oldNodes.filter((node) => node.id !== nodeId));
+
+    set({
+      nodes: newNodes,
+      edges: newEdges,
+    });
+  },
+
+  editNode(editNode) {
+    const node = get().nodes.find((node) => node.id === editNode.id);
+
+    if (node) {
+      node.data = editNode;
+    }
+
+    set({
+      nodes: [...get().nodes],
+    });
+  },
+
+  setTree(tree) {
+    set({
+      tree: tree,
+    });
+  },
+
+  setSelectedNode(node) {
+    set({
+      selectedNode: node,
+    });
+  }
+
 }));
 
 export default useStore;
 
 export function getTreeLayout<
   T extends { id: string; parentId: string | null }
->(nodes: T[]): [ReactFlowNode<T>[], Edge<T>[]] {
+>(nodes: T[]): [ReactFlowNode<T>[], Edge[]] {
   const resultNodes: ReactFlowNode<T>[] = [];
 
-  const resultEdges: Edge<T>[] = [];
+  const resultEdges: Edge[] = [];
 
   const root = d3
     .stratify<(typeof nodes)[number]>()
@@ -180,18 +195,19 @@ export function getTreeLayout<
 
       resultNodes.push({
         id: node.data.id,
-        type: "textUpdater",
         position: { x: node.x, y: node.y },
         data: node.data,
         draggable: false,
         focusable: true,
+        type: "textUpdater"
       });
+
+      if (!node.parent?.id || !node.id) return;
 
       resultEdges.push({
         id: `${node.parent?.id}-${node.id}`,
         source: node.parent?.id ?? "",
         target: node.id ?? "",
-        data: node.data,
       });
     });
 

@@ -2,6 +2,8 @@ import { cn } from "~/utils";
 import React from "react";
 import { Transition } from "@headlessui/react";
 import { useOnClickOutside } from "~/utils/hooks";
+import useWorkspaceStore from "~/store/workspace";
+import { useRouter } from "next/router";
 
 const ContextListItem = ({
   children,
@@ -51,6 +53,11 @@ export const ContextMenu = ({
   setShowing: (showing: boolean) => void;
 }) => {
   const menuref = React.useRef<HTMLDivElement>(null);
+  const { push, asPath } = useRouter();
+  const { selected } = useWorkspaceStore((state) => ({
+    setSelected: state.setSelected,
+    selected: state.selected,
+  }));
 
   useOnClickOutside(menuref, () => {
     setShowing(false);
@@ -66,7 +73,14 @@ export const ContextMenu = ({
         ref={menuref}
       >
         <ContextList>
-          <ContextListItem>Open</ContextListItem>
+          <ContextListItem
+            onClick={() => {
+              if (!selected || selected.type !== "tree") return;
+              void push(`${asPath}/${selected.id}`);
+            }}
+          >
+            Open
+          </ContextListItem>
           <ContextListItem>Open in new tab</ContextListItem>
           <ContextListItem>Edit</ContextListItem>
           <Break />

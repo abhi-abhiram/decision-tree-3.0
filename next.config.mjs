@@ -23,5 +23,8 @@ const config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  experimental: {
+    esmExternals: false,
+  },
 };
 export default config;

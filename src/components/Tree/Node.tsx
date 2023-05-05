@@ -1,67 +1,83 @@
-import { EllipsisVerticalIcon, EnvelopeIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowRightCircleIcon,
+  Bars3CenterLeftIcon,
+  CalendarIcon,
+  ChevronUpDownIcon,
+  EllipsisVerticalIcon,
+  EnvelopeIcon,
+} from "@heroicons/react/20/solid";
 import React from "react";
 import { Handle, Position, useReactFlow } from "reactflow";
-import { NodeProps } from "reactflow";
-import { Node as CustomNode } from "@prisma/client";
+import { type NodeProps } from "reactflow";
+import { type NodeType, type Node as CustomNode } from "@prisma/client";
 import { Dropdown, MenuGroup, MenuItem } from "../ui/Dropdown";
 import { cn } from "~/utils";
 import useStore from "./store";
-import { Textarea, TextareaProps } from "../ui/Textarea";
+import { api } from "~/utils/api";
 
-export function InputEditable(
-  props: Omit<TextareaProps, "onBlur"> & {
-    onBlur?: () => void;
-    edit: boolean;
-    setEdit: (val: string) => void;
-  }
-) {
-  const renameInputRef = React.useRef<HTMLTextAreaElement>(null);
+const icons: Record<NodeType, React.ReactNode> = {
+  Text: <Bars3CenterLeftIcon className="h-5 w-5  text-indigo-400" />,
+  Date: <CalendarIcon className="h-5 w-5 text-blue-400" />,
+  MultipleChoice: <ChevronUpDownIcon className="h-5 w-5 text-yellow-400" />,
+  SingleInput: <ArrowRightCircleIcon className="h-5 w-5 text-purple-400" />,
+  Number: (
+    <span className="flex h-5 w-5 items-center justify-center text-teal-400">
+      123
+    </span>
+  ),
+  Select: <ChevronUpDownIcon className="h-5 w-5 text-orange-400" />,
+};
+
+export function InputEditable(props: {
+  editable: boolean;
+  setEditable: (val: boolean) => void;
+  value: string;
+  onKeyEnter: (val: string) => void;
+}) {
+  const renameInputRef = React.useRef<HTMLInputElement>(null);
   const [value, setValue] = React.useState(props.value);
 
   React.useEffect(() => {
-    if (props.edit) {
+    if (props.editable) {
       renameInputRef.current?.focus();
     }
-  }, [props.edit]);
+  }, [props.editable]);
 
   return (
     <div
       className={cn(
-        "flex h-full flex-1 flex-col overflow-hidden",
-        props.edit && "overflow-visible"
+        "flex flex-col overflow-hidden",
+        props.editable && "overflow-visible"
       )}
     >
-      {!props.edit ? (
-        <div className="flex flex-1 text-ellipsis p-0.5 text-xs">
-          <p className="overflow-hidden text-ellipsis break-words">
-            {props.value}
-          </p>
+      {!props.editable ? (
+        <div className="flex p-0.5">
+          <span className="whitespace-nowrap text-sm">{props.value}</span>
         </div>
       ) : (
-        <div className="relative z-10 flex-1">
-          <Textarea
+        <div className="relative z-10 w-full">
+          <input
             ref={renameInputRef}
-            defaultValue={value}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 if (typeof value === "string" && value?.length > 0) {
-                  props.setEdit(value);
+                  props.onKeyEnter(value);
                 }
-                props.onBlur?.();
+                props.setEditable(false);
               }
             }}
-            {...props}
             onChange={(e) => {
               setValue(e.target.value);
             }}
+            onBlur={() => {
+              props.setEditable(false);
+              setValue(props.value);
+            }}
+            disabled={!props.editable}
             value={value}
-            variant={value?.toString().length === 0 ? "error" : "default"}
-            className="nopan h-full p-0 text-xs"
+            className="nopan w-full p-0 text-sm"
           />
         </div>
-      )}
-      {value?.toString().length === 0 && props.edit && (
-        <p className="text-xs text-red-500">Question cannot be empty</p>
       )}
     </div>
   );
@@ -69,32 +85,46 @@ export function InputEditable(
 
 export function TextUpdaterNode(props: NodeProps<CustomNode>) {
   const reactflow = useReactFlow();
-  const addNode = useStore((state) => state.addNode);
+  const { addNode, editNode, tree, deleteNode, selectedNode } = useStore(
+    (state) => ({
+      addNode: state.addNode,
+      editNode: state.editNode,
+      tree: state.tree,
+      deleteNode: state.deleteNode,
+      selectedNode: state.selectedNode,
+    })
+  );
   const [rename, setRename] = React.useState(false);
+  const { mutateAsync: addNodeMutation } = api.node.create.useMutation({
+    onSuccess(data) {
+      addNode(data);
+    },
+  });
+  const { mutateAsync: editNodeMutation } = api.node.update.useMutation();
+  const { mutateAsync: deleteNodeMutation } = api.node.delete.useMutation();
 
   return (
     <div
       className={cn(
-        "group flex h-24 w-64 animate-fade-in flex-col rounded-md border-2 border-stone-400 bg-white px-4 py-2 shadow-md transition-colors duration-200 ease-in-out hover:border-stone-900"
+        "group flex h-24 w-64 animate-fade-in flex-col rounded-md border-2 border-stone-400 bg-white px-4 py-2 shadow-md transition-colors duration-200 ease-in-out hover:border-stone-900",
+        selectedNode?.id === props.id && "border-stone-900"
       )}
     >
-      <div className="flex h-full flex-1 items-center gap-1">
+      <div className="flex h-full flex-1 items-center gap-2">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-          <EnvelopeIcon className="h-5 w-5 text-violet-500" />
+          {icons[props.data.type]}
         </div>
-        <div className="ml-2 flex h-full flex-1 flex-col ">
+        <div className="flex h-full flex-1 flex-col items-stretch justify-center">
           <InputEditable
-            value={props.data.question}
-            edit={rename}
-            setEdit={() => {
-              setRename(false);
+            value={props.data.name}
+            editable={rename}
+            setEditable={setRename}
+            onKeyEnter={(val) => {
+              editNode({ ...props.data, name: val });
+              void editNodeMutation({ id: props.id, name: val });
             }}
-            onBlur={() => {
-              setRename(false);
-            }}
-            className="nopan h-fit w-full rounded-md pl-0 pr-0 text-xs"
           />
-          <div className="p-0.5 text-gray-500">Namaste</div>
+          <div className="p-0.5 text-gray-500">{props.data.type}</div>
         </div>
         <Dropdown
           button={
@@ -106,12 +136,18 @@ export function TextUpdaterNode(props: NodeProps<CustomNode>) {
               <EllipsisVerticalIcon className="h-5 w-5" />
             </button>
           }
-          className=" top-0 z-[100] mt-0 w-24 translate-x-8"
+          className="nopan top-0 z-[100] mt-0 w-24 translate-x-8"
         >
           <MenuGroup>
             <MenuItem
               onClick={() => {
-                addNode({ ...props.data });
+                void addNodeMutation({
+                  question: "",
+                  type: "SingleInput",
+                  treeId: props.data.treeId,
+                  parentId: props.id,
+                  name: "New Node",
+                });
               }}
             >
               {() => <span>Add Node</span>}
@@ -126,10 +162,15 @@ export function TextUpdaterNode(props: NodeProps<CustomNode>) {
               {() => <span>Rename</span>}
             </MenuItem>
             <MenuItem
-              className="text-red-600 ui-active:bg-red-600"
+              className={cn(
+                "text-red-600 ui-active:bg-red-600",
+                tree?.rootNodeId === props.id && "cursor-not-allowed opacity-50"
+              )}
               onClick={() => {
-                reactflow.deleteElements({ nodes: [props] });
+                void deleteNodeMutation({ id: props.id });
+                deleteNode(props.id);
               }}
+              disabled={tree?.rootNodeId === props.id}
             >
               {() => <span>Delete</span>}
             </MenuItem>

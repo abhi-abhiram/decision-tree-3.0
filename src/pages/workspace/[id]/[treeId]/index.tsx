@@ -1,5 +1,4 @@
 import {
-  ArrowDownCircleIcon,
   ArrowUpTrayIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
@@ -9,16 +8,15 @@ import {
 } from "@heroicons/react/20/solid";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Layout from "~/components/ui/Layout";
 import { Main } from "~/components/ui/Main";
 import "reactflow/dist/style.css";
 import DisplayTree from "~/components/Tree/DisplayTree";
-import { ReactFlowProvider } from "reactflow";
+import { ReactFlowProvider, useReactFlow } from "reactflow";
 import { cn } from "~/utils";
 import { Textinput } from "~/components/ui/Textinput";
-import { type Node as CustomNode } from "@prisma/client";
-import useStore, { type RFState } from "~/components/Tree/store";
+import useStore from "~/components/Tree/store";
 import { shallow } from "zustand/shallow";
 import Tabs from "~/components/ui/Tabs";
 import { Tab } from "@headlessui/react";
@@ -27,14 +25,14 @@ import _ from "lodash";
 import Select from "~/components/ui/Select";
 import { Button } from "~/components/ui/Button";
 import Modal from "~/components/ui/Model";
-
-const selector = (state: RFState) => ({
-  nodes: state.nodes,
-  edges: state.edges,
-  onNodesChange: state.onNodesChange,
-  onEdgesChange: state.onEdgesChange,
-  onConnect: state.onConnect,
-});
+import { api } from "~/utils/api";
+import { NodeTypeIcon } from "~/components/Tree/NodeTypeIcon";
+import Loader from "~/components/ui/Loader";
+import { type UpdateNodeInput } from "~/zodObjs/node";
+import { type NodeType, type Node } from "@prisma/client";
+import { generateReactHelpers } from "@uploadthing/react";
+import type { OurFileRouter } from "~/server/uploadthing";
+import axios from "axios";
 
 function LeftNav({
   isShowing,
@@ -44,14 +42,21 @@ function LeftNav({
   setIsShowing: (isShowing: boolean) => void;
 }) {
   const [query, setQuery] = React.useState("");
-  const { nodes } = useStore(selector, shallow);
-  const [nodeId, setNodeId] = React.useState<string | undefined>(undefined);
+  const { nodes, setSelectedNode, selectedNode } = useStore(
+    ({ nodes, selectedNode, setSelectedNode }) => ({
+      nodes,
+      selectedNode,
+      setSelectedNode,
+    }),
+    shallow
+  );
+  const { setCenter } = useReactFlow();
 
   const filtereddata = React.useMemo(() => {
     return query === ""
       ? nodes
       : nodes.filter((data) =>
-          data.data.question
+          data.data.name
             .toLowerCase()
             .replace(/\s+/g, "")
             .includes(query.toLowerCase().replace(/\s+/g, ""))
@@ -94,26 +99,29 @@ function LeftNav({
         {filtereddata.map((val) => (
           <div
             className={cn(
-              "h-20 cursor-pointer px-4 py-2 text-xs text-gray-900 transition-colors duration-200 ease-in-out hover:bg-gray-200"
+              "group px-3 py-2 text-gray-900 transition-colors duration-200 ease-in-out hover:bg-gray-200",
+              val.id === selectedNode?.id && "bg-gray-200"
             )}
             key={val.id}
+            onClick={() => {
+              setCenter(val.position.x + 128, val.position.y + 48, {
+                duration: 300,
+                zoom: 1,
+              });
+
+              setSelectedNode(val);
+            }}
           >
-            <div className="flex h-full items-center">
-              <span className="flex items-center justify-center rounded-md bg-purple-400 p-1 text-black">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="h-5 w-5"
-                >
-                  <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-                  <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-                </svg>
-              </span>
-              <div className="a ml-2 flex h-full flex-1 flex-col justify-center overflow-hidden">
-                {_.truncate(val.data.question, {
-                  length: 140,
-                })}
+            <div className="flex h-full flex-1 items-center gap-1 overflow-hidden">
+              <NodeTypeIcon type={val.data.type} />
+              <div className="flex flex-1 flex-col gap-1 overflow-hidden">
+                <span className="text-sm font-medium">{val.data.name}</span>
+                <div className="flex-1 overflow-hidden text-xs font-light">
+                  {_.truncate(val.data.question, {
+                    length: 90,
+                    separator: /,? +/,
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -123,54 +131,74 @@ function LeftNav({
   );
 }
 
-const options = [
+const options: { label: string; value: NodeType; icon: React.ReactNode }[] = [
   {
-    label: "label",
-    value: "value",
-    icon: (
-      <span className="flex items-center justify-center rounded-md bg-purple-400 p-1 text-black">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="h-5 w-5"
-        >
-          <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-          <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-        </svg>
-      </span>
-    ),
+    label: "Text",
+    value: "Text",
+    icon: <NodeTypeIcon type="Text" />,
   },
   {
-    label: "label 2",
-    value: "value 2",
-    icon: (
-      <span className="flex items-center justify-center rounded-md bg-purple-400 p-1 text-black">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className="h-5 w-5"
-        >
-          <path d="M3 4a2 2 0 00-2 2v1.161l8.441 4.221a1.25 1.25 0 001.118 0L19 7.162V6a2 2 0 00-2-2H3z" />
-          <path d="M19 8.839l-7.77 3.885a2.75 2.75 0 01-2.46 0L1 8.839V14a2 2 0 002 2h14a2 2 0 002-2V8.839z" />
-        </svg>
-      </span>
-    ),
+    label: "Date",
+    value: "Date",
+    icon: <NodeTypeIcon type="Date" />,
+  },
+  {
+    value: "MultipleChoice",
+    label: "Multiple Choice",
+    icon: <NodeTypeIcon type="MultipleChoice" />,
+  },
+  {
+    value: "Number",
+    label: "Number",
+    icon: <NodeTypeIcon type="Number" />,
+  },
+  {
+    value: "Select",
+    label: "Select",
+    icon: <NodeTypeIcon type="Select" />,
+  },
+  {
+    value: "SingleInput",
+    label: "Single Input",
+    icon: <NodeTypeIcon type="SingleInput" />,
   },
 ];
 
 function RightNav({
   isShowing,
   setIsShowing,
-  data,
 }: {
   isShowing: boolean;
   setIsShowing: (isShowing: boolean) => void;
-  data: CustomNode[];
 }) {
-  const [selected, setSelected] = React.useState<string | null>(null);
+  const { selectedNode, editNode } = useStore(
+    ({ nodes, selectedNode, editNode }) => ({
+      nodes,
+      selectedNode,
+      editNode,
+    })
+  );
+  const [selected, setSelected] = React.useState<NodeType | null>(
+    selectedNode?.data.type ?? null
+  );
   const router = useRouter();
+  const [question, setQuestion] = React.useState<string | null>(null);
+  const { mutateAsync: updateNodeMutation } = api.node.update.useMutation();
+
+  const updateNode = useCallback(
+    _.debounce(async (node: UpdateNodeInput, fullNode: Node) => {
+      editNode(fullNode);
+      await updateNodeMutation(node);
+    }, 1000),
+    []
+  );
+
+  React.useEffect(() => {
+    if (selectedNode) {
+      setQuestion(selectedNode.data.question);
+      setSelected(selectedNode.data.type);
+    }
+  }, [selectedNode]);
 
   return (
     <nav
@@ -190,6 +218,21 @@ function RightNav({
                 className="rounded-md shadow-sm"
                 rows={3}
                 placeholder="Enter your question here?"
+                value={question ?? ""}
+                onChange={(event) => {
+                  setQuestion(event.target.value);
+
+                  if (selectedNode) {
+                    selectedNode.data.question = event.target.value;
+                    void updateNode(
+                      {
+                        id: selectedNode?.id ?? "",
+                        question: event.target.value,
+                      },
+                      selectedNode.data
+                    );
+                  }
+                }}
               />
             </div>
           </div>
@@ -201,7 +244,17 @@ function RightNav({
               options={options}
               selected={selected ?? null}
               setSelected={(val) => {
-                setSelected(val);
+                if (selectedNode) {
+                  selectedNode.data.type = val;
+                  void updateNode(
+                    {
+                      id: selectedNode?.id ?? "",
+                      type: val,
+                    },
+                    selectedNode.data
+                  );
+                  setSelected(val);
+                }
               }}
               showValueIcon
             />
@@ -219,7 +272,9 @@ function RightNav({
 
             <Button
               className="shadow-sm"
-              onClick={() => setIsShowing(false)}
+              onClick={() => {
+                void router.push(`${router.asPath}/help`);
+              }}
               variant={"secondary"}
               size={"sm"}
             >
@@ -233,9 +288,40 @@ function RightNav({
   );
 }
 
-export default function useWorkspaceId() {
+export default function Tree() {
   const router = useRouter();
   const [leftNavShowing, setLeftNavShowing] = React.useState(true);
+  const { setNodesAndEdges, setTree } = useStore(
+    ({ setNodesAndEdges, setTree }) => ({
+      setNodesAndEdges,
+      setTree,
+    })
+  );
+  const tree = api.tree.get.useQuery(
+    {
+      id: router.query.treeId as string,
+    },
+    {
+      onSuccess(data) {
+        if (data) {
+          setTree(data);
+          setNodesAndEdges(data.nodes);
+        }
+      },
+      enabled: !!router.query.treeId,
+      refetchOnWindowFocus: false,
+    }
+  );
+
+  if (tree.isLoading) {
+    return (
+      <Layout>
+        <div className="flex flex-1 items-center justify-center">
+          <Loader className="h-8 w-8" />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -278,30 +364,66 @@ export default function useWorkspaceId() {
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <LeftNav isShowing={leftNavShowing} setIsShowing={setLeftNavShowing} />
-        <Main className="p-0">
-          <ReactFlowProvider>
+        <ReactFlowProvider>
+          <LeftNav
+            isShowing={leftNavShowing}
+            setIsShowing={setLeftNavShowing}
+          />
+          <Main className="p-0">
             <DisplayTree />
-          </ReactFlowProvider>
-        </Main>
-        <RightNav
-          isShowing={true}
-          setIsShowing={() => {
-            console.log("rightnav");
-          }}
-          data={[]}
-        />
+          </Main>
+          <RightNav
+            isShowing={true}
+            setIsShowing={() => {
+              console.log("rightnav");
+            }}
+          />
+        </ReactFlowProvider>
       </div>
     </Layout>
   );
 }
 
+const { useUploadThing, uploadFiles } = generateReactHelpers<OurFileRouter>();
+
 function UploadImage() {
   const [isOpen, setIsOpen] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [value, setValue] = React.useState<string | null>(null);
-
+  const [img, setImg] = React.useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [uploadLoding, setUploadLoading] = useState(false);
+
+  const { getRootProps, getInputProps, isDragActive, files, startUpload } =
+    useUploadThing("imageUploader");
+
+  useEffect(() => {
+    const file = files[0];
+    if (file?.file) {
+      const blob = new Blob([file.file], { type: file.file.type });
+      const url = URL.createObjectURL(blob);
+      setImg(url);
+      setImageLoaded(true);
+    }
+  }, [files]);
+
+  useEffect(() => {
+    if (value) {
+      axios
+        .get(value, {
+          responseType: "blob",
+        })
+        .then((res) => {
+          const blob = new Blob([res.data], { type: "image/jpeg" });
+          const url = URL.createObjectURL(blob);
+          setImg(url);
+          setImageLoaded(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [value]);
 
   return (
     <>
@@ -329,7 +451,8 @@ function UploadImage() {
               leftIcon={<LinkIcon className="h-5 w-5" />}
               isRightIconClickable={true}
               rightIcon={
-                (value?.length ?? 0) > 0 && (
+                (value?.length ?? 0) > 0 &&
+                !imageLoaded && (
                   <div
                     className="flex h-5 w-5 items-center justify-center transition-colors duration-200 ease-in-out hover:text-gray-900"
                     onClick={() => {
@@ -354,7 +477,11 @@ function UploadImage() {
           "
           >
             {!imageLoaded && (
-              <div className="flex h-full flex-col items-center justify-center">
+              <div
+                className="flex h-full flex-col items-center justify-center"
+                {...getRootProps()}
+              >
+                <input {...getInputProps()} />
                 <div className="flex items-center justify-center">
                   <ArrowUpTrayIcon className="h-10 w-10 text-gray-400" />
                 </div>
@@ -366,25 +493,55 @@ function UploadImage() {
                 </div>
               </div>
             )}
-            {(value?.length ?? 0) > 0 && (
+            {(img?.length ?? 0) > 0 && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={cn(
                   "h-full w-full object-cover",
                   !imageLoaded && "hidden"
                 )}
-                onLoad={() => setImageLoaded(true)}
-                src={value ?? ""}
+                src={img ?? ""}
+                alt="img"
               />
             )}
           </div>
 
           <div className="flex justify-end gap-2">
-            <Button>Save</Button>
+            <Button
+              onClick={() => {
+                const uploadfiles = async () => {
+                  setUploadLoading(true);
+                  if (files.length > 0) {
+                    await startUpload();
+                  }
+
+                  if (value && img) {
+                    const blob = await axios.get(img, {
+                      responseType: "blob",
+                    });
+
+                    const file = new File([blob.data as Blob], "image.jpg", {
+                      type: "image/jpeg",
+                    });
+
+                    await uploadFiles([file], "imageUploader");
+                  }
+                  setUploadLoading(false);
+                };
+
+                void uploadfiles();
+              }}
+              isloading={uploadLoding}
+            >
+              Save
+            </Button>
             <Button
               variant="secondary"
               onClick={() => {
                 setIsOpen(false);
                 setValue(null);
+                setImg(null);
+                setImageLoaded(false);
               }}
             >
               Cancel
