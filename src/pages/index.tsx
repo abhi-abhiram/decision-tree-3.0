@@ -47,7 +47,7 @@ export function Nav({
 }) {
   const [query, setQuery] = React.useState("");
 
-  const { data } = api.workspace.workspaces.useQuery();
+  const { data, isLoading } = api.workspace.workspaces.useQuery();
 
   const workspaces =
     query === ""
@@ -92,7 +92,15 @@ export function Nav({
         <div className="h-5"></div>
       </div>
       <div className="mb-4 flex flex-col text-gray-600 ">
-        <WorkspacesLinks workspaces={workspaces ?? []} />
+        {isLoading ? (
+          <div className="flex flex-col gap-2">
+            <div className="mx-2 h-8 animate-pulse rounded bg-gray-200"></div>
+            <div className="mx-2 h-8 animate-pulse rounded bg-gray-200"></div>
+            <div className="mx-2 h-8 animate-pulse rounded bg-gray-200"></div>
+          </div>
+        ) : (
+          <WorkspacesLinks workspaces={workspaces ?? []} />
+        )}
       </div>
     </nav>
   );
