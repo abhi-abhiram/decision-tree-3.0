@@ -4,7 +4,7 @@ import { cn } from "~/utils";
 import Loader from "./Loader";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center bg-blue-600 font-semibold text-white shadow-sm hover:bg-blue-500 gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:translate-y-0.5 transition-transform duration-200 ease-in-out",
+  "inline-flex h-fit items-center justify-center bg-blue-600 font-semibold text-white shadow-sm hover:bg-blue-500 gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 active:translate-y-0.5 transition-transform duration-200 ease-in-out",
   {
     variants: {
       variant: {
@@ -47,13 +47,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isloading}
       >
         {isloading &&
-          (variant === "default" ? (
-            <div className="absolute flex-1 bg-inherit">
-              <Loader className="h-5 w-5 text-white" />
+          (variant === "secondary" ? (
+            <div>
+              <Loader
+                className={cn(
+                  "h-5 w-5 text-blue-700",
+                  size === "sm" && "h-4 w-4"
+                )}
+              />
             </div>
           ) : (
-            <div>
-              <Loader className="h-5 w-5 text-blue-700" />
+            <div className="absolute flex-1 bg-inherit">
+              <Loader
+                className={cn("h-5 w-5 text-white", size === "sm" && "h-4 w-4")}
+              />
             </div>
           ))}
         <div

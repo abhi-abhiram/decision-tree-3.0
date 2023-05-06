@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { TRPCError } from "@trpc/server";
-import { type Folder, type Tree } from "@prisma/client";
 
 export const folderRouter = createTRPCRouter({
     create: publicProcedure.input(z.object({ name: z.string(), workspaceId: z.string(), parentId: z.string().optional() })).mutation(async ({ ctx, input }) => {
@@ -30,6 +29,6 @@ export const folderRouter = createTRPCRouter({
         }
         )
 
-        return foldersAndTrees as (Folder | Tree)[]
+        return foldersAndTrees
     }),
 })

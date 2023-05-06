@@ -13,7 +13,7 @@ import { shallow } from "zustand/shallow";
 import useStore, { type RFState } from "./store";
 import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/20/solid";
 
-const nodeTypes = { textUpdater: TextUpdaterNode };
+const nodeTypes = { node: TextUpdaterNode };
 
 const edgeTypes: EdgeTypes = {
   default: CustomEdge,

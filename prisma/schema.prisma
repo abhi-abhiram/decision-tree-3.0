@@ -43,9 +43,9 @@ model Node {
     parentId          String?
     parent            Node?    @relation("ParentChild", fields: [parentId], references: [id])
     children          Node[]   @relation("ParentChild")
-    logics            Logic[]
     linkedNextOptions Option[]
     Tree              Tree[]
+    options           Option[] @relation("NodeOptions")
 }
 
 model Folder {
@@ -61,24 +61,14 @@ model Folder {
     workspaceId String
 }
 
-model Logic {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    nodeId    String
-    node      Node     @relation(fields: [nodeId], references: [id])
-    options   Option[]
-}
-
 model Option {
     id         String    @id @default(cuid())
     createdAt  DateTime  @default(now())
     updatedAt  DateTime  @updatedAt
     label      String    @default("")
     value      String    @default("")
-    logicId    String
-    logic      Logic     @relation(fields: [logicId], references: [id])
     nodeId     String
+    node       Node      @relation("NodeOptions", fields: [nodeId], references: [id])
     nextNodeId String
     nextNode   Node      @relation(fields: [nextNodeId], references: [id])
     varid      String?

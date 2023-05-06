@@ -1,26 +1,15 @@
+import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { ZCreateOptionInput, ZUpdateOptionInput } from "~/zodObjs/option";
 
 export const optionRouter = createTRPCRouter({
     create: publicProcedure.input(ZCreateOptionInput).mutation(async ({ ctx, input }) => {
 
-        const logic = input.logicId ? input.logicId :
-            (await ctx.prisma.logic.create({
-                data: {
-                    nodeId: input.nodeId,
-                },
-                select: {
-                    id: true,
-                }
-
-            })).id;
-
 
 
         const option = await ctx.prisma.option.create({
             data: {
                 ...input,
-                logicId: logic,
             }
         }
         )
@@ -36,6 +25,32 @@ export const optionRouter = createTRPCRouter({
             },
             data: {
                 ...input
+            }
+        })
+
+        return option
+    }
+    ),
+
+    options: publicProcedure.input(z.object(
+        {
+            id: z.string()
+        }
+    )).query(async ({ ctx, input }) => {
+        const options = await ctx.prisma.option.findMany({
+            where: {
+                nodeId: input.id
+            }
+        })
+
+        return options
+    }
+    ),
+
+    delete: publicProcedure.input(z.string()).mutation(async ({ ctx, input }) => {
+        const option = await ctx.prisma.option.delete({
+            where: {
+                id: input
             }
         })
 

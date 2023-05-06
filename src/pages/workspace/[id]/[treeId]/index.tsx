@@ -33,6 +33,7 @@ import { type NodeType, type Node } from "@prisma/client";
 import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "~/server/uploadthing";
 import axios from "axios";
+import Options from "~/components/Options";
 
 function LeftNav({
   isShowing,
@@ -166,7 +167,6 @@ const options: { label: string; value: NodeType; icon: React.ReactNode }[] = [
 
 function RightNav({
   isShowing,
-  setIsShowing,
 }: {
   isShowing: boolean;
   setIsShowing: (isShowing: boolean) => void;
@@ -282,7 +282,19 @@ function RightNav({
             </Button>
           </div>
         </Tab.Panel>
-        <Tab.Panel className={cn("bg-white p-3")}>Tab 2</Tab.Panel>
+        <Tab.Panel className={cn("bg-white p-3")}>
+          <div className="flex flex-col gap-2">
+            <div className="flex rounded border-2 border-slate-300 bg-slate-200 bg-opacity-80 p-2">
+              <div className="flex-1 text-sm font-medium text-slate-900">
+                For Node
+              </div>
+              <div className="flex-1 text-sm font-normal text-slate-900 first-letter:uppercase">
+                {selectedNode?.data.name}
+              </div>
+            </div>
+            <Options />
+          </div>
+        </Tab.Panel>
       </Tabs>
     </nav>
   );
@@ -297,6 +309,7 @@ export default function Tree() {
       setTree,
     })
   );
+
   const tree = api.tree.get.useQuery(
     {
       id: router.query.treeId as string,

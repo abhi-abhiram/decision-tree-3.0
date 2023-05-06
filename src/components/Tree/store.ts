@@ -64,6 +64,7 @@ export type RFState = {
   nodes: ReactFlowNode<CustomNode>[];
   edges: Edge[];
   selectedNode: ReactFlowNode<CustomNode> | null;
+  d3Tree: d3.HierarchyPointNode<CustomNode> | null;
   onNodesChange: OnNodesChange;
   onEdgesChange: OnEdgesChange;
   addNode: (newNode: CustomNode) => void;
@@ -80,6 +81,7 @@ const useStore = create<RFState>((set, get) => ({
   nodes: testNode,
   edges: testEdge,
   selectedNode: null,
+  d3Tree: null,
   addNode: (newNode: CustomNode) => {
 
     const oldNodes: CustomNode[] = get().nodes.map((node) => {
@@ -88,11 +90,12 @@ const useStore = create<RFState>((set, get) => ({
       };
     });
 
-    const [newNodes, newEdges] = getTreeLayout([...oldNodes, newNode]);
+    const [newNodes, newEdges, tree] = getTreeLayout([...oldNodes, newNode]);
 
     set({
       nodes: newNodes,
       edges: newEdges,
+      d3Tree: tree,
     });
   },
 
@@ -115,11 +118,12 @@ const useStore = create<RFState>((set, get) => ({
   },
 
   setNodesAndEdges(nodes) {
-    const [newNodes, newEdges] = getTreeLayout(nodes);
+    const [newNodes, newEdges, tree] = getTreeLayout(nodes);
 
     set({
       nodes: newNodes,
       edges: newEdges,
+      d3Tree: tree,
     });
   },
 
@@ -131,11 +135,12 @@ const useStore = create<RFState>((set, get) => ({
       };
     });
 
-    const [newNodes, newEdges] = getTreeLayout(oldNodes.filter((node) => node.id !== nodeId));
+    const [newNodes, newEdges, tree] = getTreeLayout(oldNodes.filter((node) => node.id !== nodeId));
 
     set({
       nodes: newNodes,
       edges: newEdges,
+      d3Tree: tree,
     });
   },
 
@@ -169,7 +174,7 @@ export default useStore;
 
 export function getTreeLayout<
   T extends { id: string; parentId: string | null }
->(nodes: T[]): [ReactFlowNode<T>[], Edge[]] {
+>(nodes: T[]): [ReactFlowNode<T>[], Edge[], d3.HierarchyPointNode<T>] {
   const resultNodes: ReactFlowNode<T>[] = [];
 
   const resultEdges: Edge[] = [];
@@ -183,33 +188,35 @@ export function getTreeLayout<
       return d.parentId;
     })(nodes);
 
-  d3.tree<(typeof nodes)[number]>()
+  const tree = d3.tree<(typeof nodes)[number]>()
     .nodeSize([150, 400])
     .separation(function (a, b) {
       return a.parent == b.parent ? 1 : 1;
-    })(root)
-    .each((node) => {
-      const x = node.x;
-      node.x = node.y;
-      node.y = x;
+    })(root);
 
-      resultNodes.push({
-        id: node.data.id,
-        position: { x: node.x, y: node.y },
-        data: node.data,
-        draggable: false,
-        focusable: true,
-        type: "textUpdater"
-      });
+  tree.each((node) => {
+    const x = node.x;
+    node.x = node.y;
+    node.y = x;
 
-      if (!node.parent?.id || !node.id) return;
-
-      resultEdges.push({
-        id: `${node.parent?.id}-${node.id}`,
-        source: node.parent?.id ?? "",
-        target: node.id ?? "",
-      });
+    resultNodes.push({
+      id: node.data.id,
+      position: { x: node.x, y: node.y },
+      data: node.data,
+      draggable: false,
+      focusable: true,
+      type: "node"
     });
 
-  return [resultNodes, resultEdges];
+    if (!node.parent?.id || !node.id) return;
+
+    resultEdges.push({
+      id: `${node.parent?.id}-${node.id}`,
+      source: node.parent?.id ?? "",
+      target: node.id ?? "",
+    });
+  });
+
+
+  return [resultNodes, resultEdges, tree];
 }

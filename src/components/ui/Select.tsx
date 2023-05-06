@@ -4,7 +4,7 @@ import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/utils";
 import React from "react";
 
-type Option<T extends string | number> = {
+export type Option<T extends string | number> = {
   label: string;
   value: T;
   icon?: React.ReactNode;
@@ -18,7 +18,7 @@ type SelectProps<T extends string | number> = {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   showValueIcon?: boolean;
-  selectBtn?: string;
+  selectBtnClass?: string;
   showValue?: boolean;
   dropdownClass?: string;
   listboxClass?: string;
@@ -42,11 +42,11 @@ export default function Select<T extends string | number>({
       <div className="relative">
         <Listbox.Button
           className={cn(
-            "relative w-full cursor-default rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm",
+            "relative flex w-full cursor-default items-center rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm",
             ((selectedOption?.icon && props.showValueIcon) || props.leftIcon) &&
               "pl-10",
             !showValue && "pl-0",
-            props.selectBtn
+            props.selectBtnClass
           )}
         >
           {props?.leftIcon &&
@@ -131,6 +131,30 @@ export default function Select<T extends string | number>({
                 )}
               </Listbox.Option>
             ))}
+            {options.length === 0 && (
+              <Listbox.Option
+                className={({ active }) =>
+                  cn(
+                    "relative cursor-default select-none py-3 pl-3 pr-4",
+                    active ? "bg-gray-100 text-gray-900" : "text-gray-900",
+                    props.listboxClass
+                  )
+                }
+                value={null}
+              >
+                {({ selected }) => (
+                  <>
+                    <span
+                      className={`block truncate pl-1 ${
+                        selected ? "font-medium" : "font-normal"
+                      }`}
+                    >
+                      No options
+                    </span>
+                  </>
+                )}
+              </Listbox.Option>
+            )}
           </Listbox.Options>
         </Transition>
       </div>
