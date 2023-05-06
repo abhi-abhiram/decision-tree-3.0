@@ -462,7 +462,7 @@ function BlockFormatDropDown({
         showValueIcon
         dropdownClass={cn("w-fit max-h-fit p-2")}
         listboxClass={cn("py-2 rounded-md cursor-pointer")}
-        selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+        selectBtnClass={cn("border-none shadow-none hover:bg-gray-200")}
       />
     </div>
   );
@@ -516,7 +516,7 @@ function FontDropDown({
       setSelected={handleClick}
       dropdownClass={cn("w-fit max-h-fit p-1")}
       listboxClass={cn("py-2 rounded-md cursor-pointer")}
-      selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+      selectBtnClass={cn("border-none shadow-none hover:bg-gray-200")}
       leftIcon={
         style === "font-family" && (
           <span className="text-base text-gray-400">T</span>
@@ -998,7 +998,7 @@ export default function ToolbarPlugin(): JSX.Element {
             options={InsertTypes}
             dropdownClass={cn("w-fit max-h-fit p-1")}
             listboxClass={cn("py-2 rounded-md cursor-pointer")}
-            selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+            selectBtnClass={cn("border-none shadow-none hover:bg-gray-200")}
             selected={""}
             leftIcon={
               <PlusIcon className="h-5 w-5 text-gray-800" aria-hidden="true" />
@@ -1050,7 +1050,7 @@ export default function ToolbarPlugin(): JSX.Element {
         }}
         dropdownClass={cn("w-fit max-h-fit p-1")}
         listboxClass={cn("py-2 rounded-md cursor-pointer")}
-        selectBtn={cn("border-none shadow-none hover:bg-gray-200")}
+        selectBtnClass={cn("border-none shadow-none hover:bg-gray-200")}
         leftIcon={
           <i
             className="h-4 w-4 text-gray-500"
