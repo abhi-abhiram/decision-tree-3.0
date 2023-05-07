@@ -37,6 +37,15 @@ function Tree() {
     }
   );
   const utils = api.useContext();
+  const scrollToBottom = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (scrollToBottom.current) {
+      scrollToBottom.current.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [nodes]);
 
   if (isLoading)
     return (
@@ -50,8 +59,9 @@ function Tree() {
   }
 
   return (
-    <div className="cneter flex h-full flex-col items-center">
-      <div className="mt-8 w-1/2">
+    <div className="cneter flex h-screen flex-col items-center">
+      <div className="flex w-1/2 flex-1 flex-col gap-1 ">
+        {<div className="flex-1" key="end" />}
         {nodes.map((node, index) => (
           <div
             key={node.id}
@@ -91,7 +101,6 @@ function Tree() {
                       addNode(newNode);
                     }
                   }
-
                   const newAns = {
                     nodeId: node.id,
                     answer: val.value,
@@ -119,6 +128,8 @@ function Tree() {
             />
           </div>
         ))}
+        <div style={{ float: "left", clear: "both" }} ref={scrollToBottom} />
+        {nodes.length > 0 && <div className="h-72" key="end" />}
       </div>
     </div>
   );

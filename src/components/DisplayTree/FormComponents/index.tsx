@@ -38,41 +38,54 @@ export default function TreeForm({
   }, [node]);
 
   return (
-    <Formik
-      onSubmit={onSubmit}
-      initialValues={{
-        value: "",
-      }}
-      validationSchema={toFormikValidationSchema(
-        z.object({
-          value: z.string(),
-        })
+    <div className="flex flex-col gap-2">
+      {node.img && (
+        <div className="h-72 w-full overflow-hidden rounded-lg border border-slate-300 p-1">
+          <div
+            className="h-full w-full rounded-md bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${node.img})`,
+            }}
+          />
+        </div>
       )}
-    >
-      {({ isSubmitting }) => (
-        <Form>
-          <div className="flex flex-col gap-2">
-            <div>
-              <p className="text-sm font-medium">{node.question}</p>
+
+      <Formik
+        onSubmit={onSubmit}
+        initialValues={{
+          value: "",
+        }}
+        validationSchema={toFormikValidationSchema(
+          z.object({
+            value: z.string(),
+          })
+        )}
+      >
+        {({ isSubmitting }) => (
+          <Form>
+            <div className="flex flex-col gap-2">
+              <div>
+                <p className="text-sm font-medium">{node.question}</p>
+              </div>
+              {type === "Date" && <Date name="value" />}
+              {type === "Number" && <FormInput name="value" type="number" />}
+              {type === "SingleInput" && <FormInput name="value" type="text" />}
+              {(type === "MultipleChoice" || type === "Select") && (
+                <FormSelect name="value" options={options} />
+              )}
+              {type === "MultiInput" && <FormTextarea name="value" />}
+              <div className="flex gap-2 self-center">
+                <Button type="reset" variant="secondary">
+                  Reset
+                </Button>
+                <Button type="submit" isloading={isSubmitting}>
+                  {isLast ? "Submit" : "Next"}
+                </Button>
+              </div>
             </div>
-            {type === "Date" && <Date name="value" />}
-            {type === "Number" && <FormInput name="value" type="number" />}
-            {type === "SingleInput" && <FormInput name="value" type="text" />}
-            {(type === "MultipleChoice" || type === "Select") && (
-              <FormSelect name="value" options={options} />
-            )}
-            {type === "MultiInput" && <FormTextarea name="value" />}
-            <div className="flex gap-2 self-center">
-              <Button type="reset" variant="secondary">
-                Reset
-              </Button>
-              <Button type="submit" isloading={isSubmitting}>
-                {isLast ? "Submit" : "Next"}
-              </Button>
-            </div>
-          </div>
-        </Form>
-      )}
-    </Formik>
+          </Form>
+        )}
+      </Formik>
+    </div>
   );
 }

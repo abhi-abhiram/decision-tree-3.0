@@ -417,6 +417,11 @@ function UploadImage() {
   const [img, setImg] = React.useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [uploadLoding, setUploadLoading] = useState(false);
+  const { selectedNode, editNode } = useStore(({ selectedNode, editNode }) => ({
+    selectedNode,
+    editNode,
+  }));
+  const { mutateAsync: updateNodeMutation } = api.node.update.useMutation();
 
   const { getRootProps, getInputProps, files, startUpload } =
     useUploadThing("imageUploader");
@@ -458,7 +463,7 @@ function UploadImage() {
         onClick={() => setIsOpen(true)}
       >
         <ArrowUpTrayIcon className="mr-2 h-5 w-5" />
-        Upload Image
+        {selectedNode?.data.img ? "Change Image" : "Upload Image"}
       </Button>
       <Modal
         title="Upload Image"
@@ -517,14 +522,14 @@ function UploadImage() {
                 </div>
               </div>
             )}
-            {(img?.length ?? 0) > 0 && (
+            {((img?.length ?? 0) > 0 || selectedNode?.data.img) && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 className={cn(
                   "h-full w-full object-cover",
                   !imageLoaded && "hidden"
                 )}
-                src={img ?? ""}
+                src={img ?? selectedNode?.data.img ?? ""}
                 alt="img"
               />
             )}
@@ -535,21 +540,48 @@ function UploadImage() {
               onClick={() => {
                 const uploadfiles = async () => {
                   setUploadLoading(true);
-                  if (files.length > 0) {
-                    await startUpload();
+                  if (selectedNode) {
+                    if (files.length > 0) {
+                      const value = (await startUpload()) as {
+                        fileKey: string;
+                        fileUrl: string;
+                      }[];
+
+                      if (value.length > 0 && selectedNode) {
+                        selectedNode.data.img = value[0]?.fileUrl ?? null;
+                      }
+                    }
+
+                    if (value && img) {
+                      const blob = await axios.get(img, {
+                        responseType: "blob",
+                      });
+
+                      const file = new File([blob.data as Blob], "image.jpg", {
+                        type: "image/jpeg",
+                      });
+
+                      const value = (await uploadFiles(
+                        [file],
+                        "imageUploader"
+                      )) as {
+                        fileKey: string;
+                        fileUrl: string;
+                      }[];
+
+                      if (value.length > 0 && selectedNode) {
+                        selectedNode.data.img = value[0]?.fileUrl ?? null;
+                      }
+                    }
+                    selectedNode && editNode(selectedNode.data);
+                    await updateNodeMutation({
+                      id: selectedNode.id,
+                      img: selectedNode.data.img ?? undefined,
+                    });
+                  } else {
+                    alert("Please select a node");
                   }
 
-                  if (value && img) {
-                    const blob = await axios.get(img, {
-                      responseType: "blob",
-                    });
-
-                    const file = new File([blob.data as Blob], "image.jpg", {
-                      type: "image/jpeg",
-                    });
-
-                    await uploadFiles([file], "imageUploader");
-                  }
                   setUploadLoading(false);
                 };
 
