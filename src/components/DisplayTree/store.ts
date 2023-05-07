@@ -1,4 +1,3 @@
-import { type Node, type Option } from "@prisma/client";
 import { create } from "zustand";
 import { type RouterOutputs } from "~/utils/api"
 
@@ -14,12 +13,8 @@ export type DisplayTreeStore = {
     setTree: (tree: DisplayTreeStore['tree']) => void;
     answers: Answer[];
     setAnswers: (answer: Answer) => void;
-    nodes: (Node & {
-        options: Option[];
-    })[];
-    addNode: (node: Node & {
-        options: Option[];
-    }) => void;
+    nodes: Exclude<RouterOutputs['node']['get'], null>[];
+    addNode: (node: DisplayTreeStore['nodes'][number]) => void;
 };
 
 

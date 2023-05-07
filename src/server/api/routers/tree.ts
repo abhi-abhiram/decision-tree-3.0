@@ -82,7 +82,13 @@ export const treeRouter = createTRPCRouter({
             include: {
                 rootNode: {
                     include: {
-                        options: true
+                        options: true,
+                        _count: {
+                            select: {
+                                children: true
+                            }
+                        }
+
                     }
                 }
             }

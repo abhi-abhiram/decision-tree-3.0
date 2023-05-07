@@ -47,7 +47,12 @@ export const nodeRouter = createTRPCRouter({
                 parentId: input.id
             },
             include: {
-                options: true
+                options: true,
+                _count: {
+                    select: {
+                        children: true
+                    }
+                }
             }
         })
 
@@ -63,7 +68,12 @@ export const nodeRouter = createTRPCRouter({
                 id: input.id
             },
             include: {
-                options: true
+                options: true,
+                _count: {
+                    select: {
+                        children: true
+                    }
+                }
             }
         })
 

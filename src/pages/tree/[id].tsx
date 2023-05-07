@@ -8,18 +8,20 @@ import {
 import Loader from "~/components/ui/Loader";
 import { cn } from "~/utils";
 import { api } from "~/utils/api";
+import download from "js-file-download";
 
 function Tree() {
-  const { setTree, setAnswers, nodes, addNode } = useDisplayTreeStore(
-    ({ setTree, setAnswers, nodes, addNode }) => ({
+  const { setTree, setAnswers, nodes, addNode, answers } = useDisplayTreeStore(
+    ({ setTree, setAnswers, nodes, addNode, tree, answers }) => ({
       setTree,
       setAnswers,
       nodes,
       addNode,
+      tree,
+      answers,
     })
   );
   const router = useRouter();
-  const [newNodeFetching, setNewNodeFetching] = React.useState(false);
   const { data: tree, isLoading } = api.tree.onlyTree.useQuery(
     { id: router.query.id as string },
     {
@@ -53,48 +55,67 @@ function Tree() {
         {nodes.map((node, index) => (
           <div
             key={node.id}
-            className={cn(index !== nodes.length - 1 && "opacity-50")}
+            className={cn(
+              index !== nodes.length - 1 && "pointer-events-none opacity-50"
+            )}
           >
             <TreeForm
               onSubmit={(val, { setSubmitting }) => {
                 const submit = async () => {
-                  setNewNodeFetching(true);
-                  let newNode: DisplayTreeStore["nodes"][number] | null;
-                  if (node.type === "MultipleChoice") {
-                    const option = node.options.find(
-                      (option) => option.id === val.value
-                    );
-                    if (!option) {
-                      alert("Invalid option");
-                      return;
-                    }
-                    if (option.nextNodeId) {
-                      newNode = await utils.node.get.fetch({
-                        id: option.nextNodeId,
-                      });
+                  if (node._count.children !== 0) {
+                    let newNode: DisplayTreeStore["nodes"][number] | null;
+
+                    if (node.type === "MultipleChoice") {
+                      const option = node.options.find(
+                        (option) => option.id === val.value
+                      );
+                      if (!option) {
+                        alert("Invalid option");
+                        return;
+                      }
+                      if (option.nextNodeId) {
+                        newNode = await utils.node.get.fetch({
+                          id: option.nextNodeId,
+                        });
+                        val.value = option.value;
+                      } else {
+                        newNode = null;
+                      }
                     } else {
-                      newNode = null;
+                      newNode = await utils.node.getSingleChild.fetch({
+                        id: node.id,
+                      });
                     }
-                  } else {
-                    newNode = await utils.node.getSingleChild.fetch({
-                      id: node.id,
-                    });
+
+                    if (newNode) {
+                      addNode(newNode);
+                    }
                   }
-                  if (newNode) {
-                    addNode(newNode);
-                  }
-                  setAnswers({
+
+                  const newAns = {
                     nodeId: node.id,
                     answer: val.value,
                     nodeName: node.name,
                     question: node.question,
-                  });
-                  setNewNodeFetching(false);
+                  };
+
+                  setAnswers(newAns);
+
+                  if (node._count.children === 0) {
+                    download(
+                      JSON.stringify([...answers, newAns], null, 2),
+                      "answers.json",
+                      "text/plain"
+                    );
+                  }
+
                   setSubmitting(false);
                 };
                 void submit();
               }}
               node={node}
+              isDisabled={index !== nodes.length - 1}
+              isLast={node._count.children === 0}
             />
           </div>
         ))}

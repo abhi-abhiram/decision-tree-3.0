@@ -76,13 +76,20 @@ export const ContextMenu = ({
           <ContextListItem
             onClick={() => {
               if (!selected || selected.type !== "tree") return;
-              void push(`${asPath}/${selected.id}`);
+              void push(`/tree/${selected.id}`);
             }}
           >
             Open
           </ContextListItem>
           <ContextListItem>Open in new tab</ContextListItem>
-          <ContextListItem>Edit</ContextListItem>
+          <ContextListItem
+            onClick={() => {
+              if (!selected || selected.type !== "tree") return;
+              void push(`${asPath}/${selected.id}`);
+            }}
+          >
+            Edit
+          </ContextListItem>
           <Break />
           <ContextListItem>Rename</ContextListItem>
           <ContextListItem>Copy</ContextListItem>

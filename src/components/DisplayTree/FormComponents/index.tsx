@@ -13,6 +13,8 @@ import { type DisplayTreeStore } from "../store";
 export default function TreeForm({
   onSubmit,
   node: { type, ...node },
+  isDisabled,
+  isLast,
 }: {
   onSubmit: (
     value: {
@@ -21,6 +23,8 @@ export default function TreeForm({
     formikHelpers: FormikHelpers<{ value: string; option?: Option }>
   ) => void;
   node: DisplayTreeStore["nodes"][number];
+  isDisabled?: boolean;
+  isLast?: boolean;
 }) {
   const options = React.useMemo(() => {
     return (
@@ -32,6 +36,7 @@ export default function TreeForm({
       }) ?? []
     );
   }, [node]);
+
   return (
     <Formik
       onSubmit={onSubmit}
@@ -57,9 +62,12 @@ export default function TreeForm({
               <FormSelect name="value" options={options} />
             )}
             {type === "MultiInput" && <FormTextarea name="value" />}
-            <div className="self-end">
+            <div className="flex gap-2 self-center">
+              <Button type="reset" variant="secondary">
+                Reset
+              </Button>
               <Button type="submit" isloading={isSubmitting}>
-                Next
+                {isLast ? "Submit" : "Next"}
               </Button>
             </div>
           </div>
