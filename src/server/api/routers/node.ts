@@ -6,11 +6,6 @@ export const nodeRouter = createTRPCRouter({
         const node = await ctx.prisma.node.create({
             data: {
                 ...input,
-                Tree: {
-                    connect: {
-                        id: input.treeId
-                    }
-                }
             }
         }
         )

@@ -16,48 +16,6 @@ import { type Tree, type Node as CustomNode } from "@prisma/client";
 import * as d3 from "d3-hierarchy";
 
 
-const initialNodes: CustomNode[] = [
-  {
-    id: "1",
-    name: "Node 1",
-    parentId: null,
-    type: "Date",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    question: "What is your name?",
-    treeId: "1",
-  }, {
-    id: "2",
-    name: "Node 2",
-    parentId: "1",
-    type: "Date",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    question: "What is your name?",
-    treeId: "1",
-  }, {
-    id: "3",
-    name: "Node 3",
-    parentId: "1",
-    type: "Date",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    question: "What is your name?",
-    treeId: "1",
-  }, {
-    id: "4",
-    name: "Node 4",
-    parentId: "2",
-    type: "Date",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    question: "What is your name?",
-    treeId: "1",
-  }
-];
-
-const [testNode, testEdge] = getTreeLayout(initialNodes);
-
 
 export type RFState = {
   tree: Tree | null,
@@ -78,8 +36,8 @@ export type RFState = {
 
 const useStore = create<RFState>((set, get) => ({
   tree: null,
-  nodes: testNode,
-  edges: testEdge,
+  nodes: [],
+  edges: [],
   selectedNode: null,
   d3Tree: null,
   addNode: (newNode: CustomNode) => {
@@ -129,13 +87,22 @@ const useStore = create<RFState>((set, get) => ({
 
   deleteNode(nodeId) {
     const oldNodes = get().nodes.map((node) => {
-
       return {
         ...node.data,
       };
     });
 
-    const [newNodes, newEdges, tree] = getTreeLayout(oldNodes.filter((node) => node.id !== nodeId));
+    const [newNodes, newEdges, tree] = getTreeLayout(oldNodes.filter((node) => {
+      if (node.id === nodeId) {
+        return false;
+      }
+
+      if (node.parentId === nodeId) {
+        return false;
+      }
+
+      return true;
+    }));
 
     set({
       nodes: newNodes,

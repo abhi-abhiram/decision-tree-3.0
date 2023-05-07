@@ -1,5 +1,4 @@
 import { createTRPCRouter } from "~/server/api/trpc";
-import { exampleRouter } from "~/server/api/routers/example";
 import { workspaceRouter } from "./routers/workspace";
 import { folderRouter } from "./routers/folder";
 import { treeRouter } from "./routers/tree";
@@ -12,7 +11,6 @@ import { optionRouter } from "./routers/option";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  example: exampleRouter,
   workspace: workspaceRouter,
   folder: folderRouter,
   tree: treeRouter,

@@ -41,10 +41,10 @@ model Node {
     treeId            String
     type              NodeType
     parentId          String?
-    parent            Node?    @relation("ParentChild", fields: [parentId], references: [id])
+    parent            Node?    @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
     children          Node[]   @relation("ParentChild")
     linkedNextOptions Option[]
-    Tree              Tree[]
+    tree              Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
     options           Option[] @relation("NodeOptions")
 }
 

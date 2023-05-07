@@ -66,7 +66,7 @@ export const workspaceRouter = createTRPCRouter({
 
 
         return {
-            foldersAndTrees: foldersAndTrees as (Folder | Tree)[],
+            foldersAndTrees: foldersAndTrees,
         }
     }),
 

@@ -34,6 +34,8 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "~/server/uploadthing";
 import axios from "axios";
 import Options from "~/components/Options";
+import { useIsMutating } from "@tanstack/react-query";
+import { getQueryKey } from "@trpc/react-query";
 
 function LeftNav({
   isShowing,
@@ -310,6 +312,10 @@ export default function Tree() {
     })
   );
 
+  const isNewNodeFetching = useIsMutating({
+    mutationKey: getQueryKey(api.node.create),
+  });
+
   const tree = api.tree.get.useQuery(
     {
       id: router.query.treeId as string,
@@ -382,7 +388,12 @@ export default function Tree() {
             isShowing={leftNavShowing}
             setIsShowing={setLeftNavShowing}
           />
-          <Main className="p-0">
+          <Main className="relative p-0">
+            {isNewNodeFetching > 0 && (
+              <div className="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white bg-opacity-50">
+                <Loader className="h-8 w-8" />
+              </div>
+            )}
             <DisplayTree />
           </Main>
           <RightNav
@@ -407,7 +418,7 @@ function UploadImage() {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [uploadLoding, setUploadLoading] = useState(false);
 
-  const { getRootProps, getInputProps, isDragActive, files, startUpload } =
+  const { getRootProps, getInputProps, files, startUpload } =
     useUploadThing("imageUploader");
 
   useEffect(() => {

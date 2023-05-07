@@ -49,11 +49,6 @@ export const treeRouter = createTRPCRouter({
                     treeId: tree.id,
                     type: "SingleInput",
                     question: "Root",
-                    Tree: {
-                        connect: {
-                            id: tree.id
-                        }
-                    }
                 },
 
             }
