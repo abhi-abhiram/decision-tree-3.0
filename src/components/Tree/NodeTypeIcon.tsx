@@ -9,7 +9,7 @@ import { cn } from "~/utils";
 
 export function NodeTypeIcon(props: { type: NodeType; className?: string }) {
   const icons: Record<NodeType, React.ReactNode> = {
-    Text: (
+    MultiInput: (
       <span className="bg-greeen-400 flex items-center justify-center rounded-md bg-indigo-400 p-1 text-black">
         <Bars3CenterLeftIcon className={cn("h-5 w-5", props.className)} />
       </span>

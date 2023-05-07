@@ -23,13 +23,14 @@ type SelectProps<T extends string | number> = {
   dropdownClass?: string;
   listboxClass?: string;
   placeholder?: string;
-};
+} & { buttonProps?: React.ComponentPropsWithoutRef<"button"> };
 
 export default function Select<T extends string | number>({
   options,
   selected,
   setSelected,
   showValue = true,
+  buttonProps,
   ...props
 }: SelectProps<T>) {
   const selectedOption = React.useMemo(
@@ -48,6 +49,7 @@ export default function Select<T extends string | number>({
             !showValue && "pl-0",
             props.selectBtnClass
           )}
+          {...buttonProps}
         >
           {props?.leftIcon &&
             !(selectedOption?.icon && props.showValueIcon) && (

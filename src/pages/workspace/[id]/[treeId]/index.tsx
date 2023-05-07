@@ -136,9 +136,9 @@ function LeftNav({
 
 const options: { label: string; value: NodeType; icon: React.ReactNode }[] = [
   {
-    label: "Text",
-    value: "Text",
-    icon: <NodeTypeIcon type="Text" />,
+    label: "MultiInput",
+    value: "MultiInput",
+    icon: <NodeTypeIcon type="MultiInput" />,
   },
   {
     label: "Date",

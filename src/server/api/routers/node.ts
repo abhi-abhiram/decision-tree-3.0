@@ -1,5 +1,6 @@
 import { ZCreateNodeInput, ZUpdateNodeInput } from "~/zodObjs/node";
 import { publicProcedure, createTRPCRouter } from "../trpc";
+import { z } from "zod";
 
 export const nodeRouter = createTRPCRouter({
     create: publicProcedure.input(ZCreateNodeInput).mutation(async ({ ctx, input }) => {
@@ -37,4 +38,37 @@ export const nodeRouter = createTRPCRouter({
         return node
     }
     ),
+
+    getSingleChild: publicProcedure.input(z.object({
+        id: z.string()
+    })).query(async ({ ctx, input }) => {
+        const node = await ctx.prisma.node.findFirst({
+            where: {
+                parentId: input.id
+            },
+            include: {
+                options: true
+            }
+        })
+
+        return node
+    }
+    ),
+
+    get: publicProcedure.input(z.object({
+        id: z.string()
+    })).query(async ({ ctx, input }) => {
+        const node = await ctx.prisma.node.findUnique({
+            where: {
+                id: input.id
+            },
+            include: {
+                options: true
+            }
+        })
+
+        return node
+    }
+    ),
+
 })

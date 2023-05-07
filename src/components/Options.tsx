@@ -11,10 +11,13 @@ import { toFormikValidationSchema } from "zod-formik-adapter";
 import { ZCreateOptionInput } from "~/zodObjs/option";
 
 export default function Options() {
-  const { selectedNode, d3Tree } = useStore(({ selectedNode, d3Tree }) => ({
-    selectedNode,
-    d3Tree,
-  }));
+  const { selectedNode, nodes } = useStore(
+    ({ selectedNode, d3Tree, nodes }) => ({
+      selectedNode,
+      d3Tree,
+      nodes,
+    })
+  );
 
   const { data: options } = api.option.options.useQuery(
     { id: selectedNode?.id ?? "" },
@@ -28,15 +31,15 @@ export default function Options() {
 
   const nextNodeOptions = useMemo(() => {
     return (
-      d3Tree
-        ?.find((n) => n.id === selectedNode?.id)
-        ?.children?.map((val) => ({
+      nodes
+        .filter((val) => val.data.parentId === selectedNode?.id)
+        .map((val) => ({
           label: val.data.name,
-          value: val.id!,
+          value: val.id,
           icon: <NodeTypeIcon type={val.data.type} className="h-4 w-4" />,
         })) ?? []
     );
-  }, [selectedNode?.id, d3Tree]);
+  }, [selectedNode?.id, nodes]);
 
   const utils = api.useContext();
 
@@ -61,7 +64,6 @@ export default function Options() {
               nodeId: selectedNode.id,
               label: "",
               value: "",
-              nextNodeId: nextNodeOptions?.[0]?.value ?? "",
             }).then(() => {
               void utils.option.options.invalidate({ id: selectedNode.id });
             });
@@ -92,7 +94,7 @@ const initialValues: {
   id: string;
   label: string;
   value: string;
-  nextNodeId: string;
+  nextNodeId: string | null;
   nodeId: string;
 } = {
   id: "",

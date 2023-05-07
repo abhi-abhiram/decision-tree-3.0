@@ -26,7 +26,8 @@ model Tree {
     updatedAt   DateTime   @updatedAt
     workspaceId String
     workspace   Workspace  @relation(fields: [workspaceId], references: [id])
-    rootNodeId  String?
+    rootNodeId  String?    @unique
+    rootNode    Node?      @relation("RootTree", fields: [rootNodeId], references: [id])
     nodes       Node[]
     folders     Folder[]
     vars        Variable[]
@@ -44,8 +45,10 @@ model Node {
     parent            Node?    @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
     children          Node[]   @relation("ParentChild")
     linkedNextOptions Option[]
-    tree              Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
+    tree              Tree     @relation(fields: [treeId], references: [id])
     options           Option[] @relation("NodeOptions")
+    Tree              Tree?    @relation("RootTree")
+    defaultNextNodeId String?
 }
 
 model Folder {
@@ -68,9 +71,9 @@ model Option {
     label      String    @default("")
     value      String    @default("")
     nodeId     String
-    node       Node      @relation("NodeOptions", fields: [nodeId], references: [id])
-    nextNodeId String
-    nextNode   Node      @relation(fields: [nextNodeId], references: [id])
+    node       Node      @relation("NodeOptions", fields: [nodeId], references: [id], onDelete: Cascade)
+    nextNodeId String?
+    nextNode   Node?     @relation(fields: [nextNodeId], references: [id])
     varid      String?
     var        Variable? @relation(fields: [varid], references: [id])
 }
@@ -89,8 +92,8 @@ model Variable {
 enum NodeType {
     MultipleChoice
     Select
-    Text
     SingleInput
+    MultiInput
     Date
     Number
 }

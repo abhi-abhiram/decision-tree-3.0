@@ -1,6 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 const config = {
-  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: "class",
+  content: [
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/react-tailwindcss-datepicker/dist/index.esm.js",
+  ],
   theme: {
     extend: {
       animation: {
@@ -14,6 +18,7 @@ const config = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   plugins: [require("@headlessui/tailwindcss")({ prefix: "ui" })],
 };
 

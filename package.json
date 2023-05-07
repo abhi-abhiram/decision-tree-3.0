@@ -7,7 +7,8 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "type-check": "tsc"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.13",
@@ -27,6 +28,7 @@
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
     "d3-hierarchy": "^3.1.2",
+    "dayjs": "^1.11.7",
     "formik": "^2.2.9",
     "lexical": "^0.9.1",
     "lodash": "^4.17.21",
@@ -36,6 +38,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
+    "react-tailwindcss-datepicker": "^1.6.0",
     "reactflow": "^11.6.1",
     "superjson": "1.9.1",
     "tailwind-merge": "^1.10.0",

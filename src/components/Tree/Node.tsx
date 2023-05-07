@@ -16,7 +16,7 @@ import useStore from "./store";
 import { api } from "~/utils/api";
 
 const icons: Record<NodeType, React.ReactNode> = {
-  Text: <Bars3CenterLeftIcon className="h-5 w-5  text-indigo-400" />,
+  MultiInput: <Bars3CenterLeftIcon className="h-5 w-5  text-indigo-400" />,
   Date: <CalendarIcon className="h-5 w-5 text-blue-400" />,
   MultipleChoice: <ChevronUpDownIcon className="h-5 w-5 text-yellow-400" />,
   SingleInput: <ArrowRightCircleIcon className="h-5 w-5 text-purple-400" />,

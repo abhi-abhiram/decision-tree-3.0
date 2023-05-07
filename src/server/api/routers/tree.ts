@@ -71,4 +71,24 @@ export const treeRouter = createTRPCRouter({
         return tree
     }
     ),
+
+    onlyTree: publicProcedure.input(z.object({
+        id: z.string()
+    })).query(async ({ ctx, input }) => {
+        const tree = await ctx.prisma.tree.findUnique({
+            where: {
+                id: input.id
+            },
+            include: {
+                rootNode: {
+                    include: {
+                        options: true
+                    }
+                }
+            }
+        })
+
+        return tree
+    }
+    ),
 })
