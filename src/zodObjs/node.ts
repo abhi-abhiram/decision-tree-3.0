@@ -15,6 +15,7 @@ export const ZUpdateNodeInput = z.object({
     type: z.nativeEnum(NodeType).optional(),
     name: z.string().optional(),
     img: z.string().optional(),
+    helpText: z.string().optional(),
 })
 
 export type UpdateNodeInput = z.infer<typeof ZUpdateNodeInput>

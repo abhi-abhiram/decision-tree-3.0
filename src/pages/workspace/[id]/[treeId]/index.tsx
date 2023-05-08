@@ -275,7 +275,7 @@ function RightNav({
             <Button
               className="shadow-sm"
               onClick={() => {
-                void router.push(`${router.asPath}/help`);
+                selectedNode && void router.push(`/help/${selectedNode.id}`);
               }}
               variant={"secondary"}
               size={"sm"}

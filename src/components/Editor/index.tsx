@@ -6,13 +6,17 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import ToolbarPlugin from "./plugins/ToolbarPlugin";
 import PlaygroundNodes from "./nodes";
-import { type EditorThemeClasses } from "lexical";
+import { $getRoot, $insertNodes, type EditorThemeClasses } from "lexical";
 import { cn } from "~/utils";
 import React from "react";
 import DraggableBlockPlugin from "./plugins/DraggableBlockPlugin";
-import HtmlPlugin from "./plugins/HtmlPlugin";
 import { HorizontalRulePlugin } from "@lexical/react/LexicalHorizontalRulePlugin";
 import ImagesPlugin from "./plugins/ImagesPlugin";
+import { useRouter } from "next/router";
+import { api } from "~/utils/api";
+import { $generateNodesFromDOM } from "@lexical/html";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import ExportPlugin from "./plugins/ExportPlugin";
 
 function onError(error: Error) {
   console.error(error);
@@ -29,6 +33,10 @@ const theme: EditorThemeClasses = {
     listitem: cn("ml-4 list-inside"),
     ol: cn("list-decimal"),
     ul: cn("list-disc"),
+  },
+  text: {
+    bold: cn("font-bold"),
+    italic: cn("italic"),
   },
 };
 
@@ -49,9 +57,22 @@ export default function Editor() {
     }
   };
 
+  const [isInitialized, setIsInitialized] = React.useState(false);
+
   return (
     <>
-      <LexicalComposer initialConfig={initialConfig}>
+      <LexicalComposer
+        initialConfig={{
+          ...initialConfig,
+          editorState() {
+            return '<div class="flex flex-col"><div class="flex-1 px-7 py-2 leading-6 focus-visible:outline-none" contenteditable="true"></div></div>';
+          },
+        }}
+      >
+        <Intialize
+          isInitialized={isInitialized}
+          setInitialized={setIsInitialized}
+        />
         <ToolbarPlugin />
         <ListPlugin />
         <RichTextPlugin
@@ -69,10 +90,50 @@ export default function Editor() {
         ) : (
           <></>
         )}
+        <ExportPlugin />
         <HorizontalRulePlugin />
-        <HtmlPlugin onHtmlChanged={(html) => console.log(html)} />
         <ImagesPlugin />
       </LexicalComposer>
     </>
   );
+}
+
+function Intialize({
+  setInitialized,
+  isInitialized,
+}: {
+  setInitialized: (initialized: boolean) => void;
+  isInitialized: boolean;
+}) {
+  const router = useRouter();
+  const { data: nodeDate } = api.node.get.useQuery(
+    {
+      id: router.query.id as string,
+    },
+    {
+      enabled: !!router.query.id,
+    }
+  );
+  const [editor] = useLexicalComposerContext();
+
+  React.useEffect(() => {
+    const helpText = nodeDate?.helpText;
+    if (helpText && !isInitialized) {
+      setInitialized(true);
+      editor.update(() => {
+        const parser = new DOMParser();
+        const dom = parser.parseFromString(helpText, "text/html");
+
+        const nodes = $generateNodesFromDOM(editor, dom);
+
+        $getRoot().select();
+
+        console.log(isInitialized);
+
+        $insertNodes(nodes);
+      });
+    }
+  }, [nodeDate]);
+
+  return <></>;
 }

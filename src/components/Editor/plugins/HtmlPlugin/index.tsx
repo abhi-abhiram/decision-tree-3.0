@@ -16,7 +16,6 @@ const HtmlPlugin = ({ initialHtml, onHtmlChanged }: Props) => {
 
   useEffect(() => {
     if (!initialHtml || !isFirstRender) return;
-
     setIsFirstRender(false);
 
     editor.update(() => {
@@ -25,7 +24,7 @@ const HtmlPlugin = ({ initialHtml, onHtmlChanged }: Props) => {
       const nodes = $generateNodesFromDOM(editor, dom);
       $insertNodes(nodes);
     });
-  }, []);
+  }, [isFirstRender]);
 
   return (
     <OnChangePlugin

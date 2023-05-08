@@ -197,16 +197,6 @@ const InsertTypes: {
     label: "Horizontal Rule",
     icon: <MinusIcon className="h-4 w-4 text-gray-500" />,
   },
-  {
-    value: "table",
-    label: "Table",
-    icon: <TableCellsIcon className="h-4 w-4 text-gray-500" />,
-  },
-  {
-    value: "collapsible",
-    label: "Collapsible",
-    icon: <PlayIcon className="h-4 w-4 text-gray-500" />,
-  },
 ];
 
 const blockTypeToBlockName = {
@@ -689,72 +679,6 @@ export default function ToolbarPlugin(): JSX.Element {
     );
   }, [$updateToolbar, activeEditor, editor]);
 
-  const applyStyleText = useCallback(
-    (styles: Record<string, string>) => {
-      activeEditor.update(() => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          $patchStyleText(selection, styles);
-        }
-      });
-    },
-    [activeEditor]
-  );
-
-  const clearFormatting = useCallback(() => {
-    activeEditor.update(() => {
-      const selection = $getSelection();
-      if ($isRangeSelection(selection)) {
-        $selectAll(selection);
-        selection.getNodes().forEach((node) => {
-          if ($isTextNode(node)) {
-            node.setFormat(0);
-            node.setStyle("");
-            $getNearestBlockElementAncestorOrThrow(node).setFormat("");
-          }
-          if ($isDecoratorBlockNode(node)) {
-            node.setFormat("");
-          }
-        });
-      }
-    });
-  }, [activeEditor]);
-
-  const onFontColorSelect = useCallback(
-    (value: string) => {
-      applyStyleText({ color: value });
-    },
-    [applyStyleText]
-  );
-
-  const onBgColorSelect = useCallback(
-    (value: string) => {
-      applyStyleText({ "background-color": value });
-    },
-    [applyStyleText]
-  );
-
-  const insertLink = useCallback(() => {
-    if (!isLink) {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, sanitizeUrl("https://"));
-    } else {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, null);
-    }
-  }, [editor, isLink]);
-
-  const onCodeLanguageSelect = useCallback(
-    (value: string) => {
-      activeEditor.update(() => {
-        if (selectedElementKey !== null) {
-          const node = $getNodeByKey(selectedElementKey);
-          if ($isCodeNode(node)) {
-            node.setLanguage(value);
-          }
-        }
-      });
-    },
-    [activeEditor, selectedElementKey]
-  );
   //   const insertGifOnClick = (payload: InsertImagePayload) => {
   //     activeEditor.dispatchCommand(INSERT_IMAGE_COMMAND, payload);
   //   };
@@ -806,26 +730,6 @@ export default function ToolbarPlugin(): JSX.Element {
         </>
       )}
       {blockType === "code" ? (
-        // <DropDown
-        //   disabled={!isEditable}
-        //   buttonClassName="toolbar-item code-language"
-        //   buttonLabel={getLanguageFriendlyName(codeLanguage)}
-        //   buttonAriaLabel="Select language"
-        // >
-        //   {CODE_LANGUAGE_OPTIONS.map(([value, name]) => {
-        //     return (
-        //       <DropDownItem
-        //         className={`item ${dropDownActiveClass(
-        //           value === codeLanguage
-        //         )}`}
-        //         onClick={() => onCodeLanguageSelect(value)}
-        //         key={value}
-        //       >
-        //         <span className="text">{name}</span>
-        //       </DropDownItem>
-        //     );
-        //   })}
-        // </DropDown>
         <></>
       ) : (
         <>
@@ -893,100 +797,6 @@ export default function ToolbarPlugin(): JSX.Element {
           >
             U
           </button>
-          {/* <button
-            disabled={!isEditable}
-            onClick={() => {
-              activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "code");
-            }}
-            className={"toolbar-item spaced " + (isCode ? "active" : "")}
-            title="Insert code block"
-            type="button"
-            aria-label="Insert code block"
-          ></button>
-          <button
-            disabled={!isEditable}
-            onClick={insertLink}
-            className={"toolbar-item spaced " + (isLink ? "active" : "")}
-            aria-label="Insert link"
-            title="Insert link"
-            type="button"
-          >
-            <i className="format link" />
-          </button> */}
-          {/* <ColorPicker
-            disabled={!isEditable}
-            buttonClassName="toolbar-item color-picker"
-            buttonAriaLabel="Formatting text color"
-            buttonIconClassName="icon font-color"
-            color={fontColor}
-            onChange={onFontColorSelect}
-            title="text color"
-          />
-          <ColorPicker
-            disabled={!isEditable}
-            buttonClassName="toolbar-item color-picker"
-            buttonAriaLabel="Formatting background color"
-            buttonIconClassName="icon bg-color"
-            color={bgColor}
-            onChange={onBgColorSelect}
-            title="bg color"
-          /> */}
-          {/* <DropDown
-            disabled={!isEditable}
-            buttonClassName="toolbar-item spaced"
-            buttonLabel=""
-            buttonAriaLabel="Formatting options for additional text styles"
-            buttonIconClassName="icon dropdown-more"
-          >
-            <DropDownItem
-              onClick={() => {
-                activeEditor.dispatchCommand(
-                  FORMAT_TEXT_COMMAND,
-                  "strikethrough"
-                );
-              }}
-              className={"item " + dropDownActiveClass(isStrikethrough)}
-              title="Strikethrough"
-              aria-label="Format text with a strikethrough"
-            >
-              <i className="icon strikethrough" />
-              <span className="text">Strikethrough</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                activeEditor.dispatchCommand(FORMAT_TEXT_COMMAND, "subscript");
-              }}
-              className={"item " + dropDownActiveClass(isSubscript)}
-              title="Subscript"
-              aria-label="Format text with a subscript"
-            >
-              <i className="icon subscript" />
-              <span className="text">Subscript</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={() => {
-                activeEditor.dispatchCommand(
-                  FORMAT_TEXT_COMMAND,
-                  "superscript"
-                );
-              }}
-              className={"item " + dropDownActiveClass(isSuperscript)}
-              title="Superscript"
-              aria-label="Format text with a superscript"
-            >
-              <i className="icon superscript" />
-              <span className="text">Superscript</span>
-            </DropDownItem>
-            <DropDownItem
-              onClick={clearFormatting}
-              className="item"
-              title="Clear text formatting"
-              aria-label="Clear all text formatting"
-            >
-              <i className="icon clear" />
-              <span className="text">Clear Formatting</span>
-            </DropDownItem>
-          </DropDown> */}
           <Divider />
           {rootType === "table" && (
             <>
@@ -1005,15 +815,7 @@ export default function ToolbarPlugin(): JSX.Element {
             }
             placeholder="Insert"
             setSelected={(value) => {
-              if (value === "table") {
-                showModal("Insert Table", (onClose) => (
-                  // <InsertTableDialog
-                  //   activeEditor={activeEditor}
-                  //   onClose={onClose}
-                  // />
-                  <></>
-                ));
-              } else if (value === "image") {
+              if (value === "image") {
                 showModal("Insert Image", (onClose) => (
                   <InsertImageDialog
                     activeEditor={activeEditor}

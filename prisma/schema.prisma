@@ -25,7 +25,7 @@ model Tree {
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
     workspaceId String
-    workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+    workspace   Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
     rootNodeId  String?    @unique
     rootNode    Node?      @relation("RootTree", fields: [rootNodeId], references: [id])
     nodes       Node[]
@@ -42,11 +42,12 @@ model Node {
     updatedAt         DateTime @updatedAt
     treeId            String
     type              NodeType
+    helpText          String?
     parentId          String?
     parent            Node?    @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
     children          Node[]   @relation("ParentChild")
     linkedNextOptions Option[]
-    tree              Tree     @relation(fields: [treeId], references: [id])
+    tree              Tree     @relation(fields: [treeId], references: [id], onDelete: Cascade)
     options           Option[] @relation("NodeOptions")
     Tree              Tree?    @relation("RootTree")
     defaultNextNodeId String?
