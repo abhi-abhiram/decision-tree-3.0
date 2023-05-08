@@ -128,8 +128,6 @@ function Intialize({
 
         $getRoot().select();
 
-        console.log(isInitialized);
-
         $insertNodes(nodes);
       });
     }
