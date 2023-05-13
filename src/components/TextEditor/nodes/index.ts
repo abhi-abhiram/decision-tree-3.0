@@ -10,9 +10,9 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
 
-import { CollapsibleContainerNode } from "~/components/Editor/plugins/CollapsiblePlugin/CollapsibleContainerNode";
-import { CollapsibleContentNode } from "~/components/Editor/plugins/CollapsiblePlugin/CollapsibleContentNode";
-import { CollapsibleTitleNode } from "~/components/Editor/plugins/CollapsiblePlugin/CollapsibleTitleNode";
+import { CollapsibleContainerNode } from "~/components/TextEditor/plugins/CollapsiblePlugin/CollapsibleContainerNode";
+import { CollapsibleContentNode } from "~/components/TextEditor/plugins/CollapsiblePlugin/CollapsibleContentNode";
+import { CollapsibleTitleNode } from "~/components/TextEditor/plugins/CollapsiblePlugin/CollapsibleTitleNode";
 // import { AutocompleteNode } from "./AutocompleteNode";
 // import { EmojiNode } from "./EmojiNode";
 // import { EquationNode } from "./EquationNode";

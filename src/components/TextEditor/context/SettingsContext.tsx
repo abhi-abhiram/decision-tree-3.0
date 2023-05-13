@@ -1,4 +1,4 @@
-import type { SettingName } from "~/components/Editor/settings";
+import type { SettingName } from "~/components/TextEditor/settings";
 
 import * as React from "react";
 import {
@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 
-import { DEFAULT_SETTINGS } from "~/components/Editor/settings";
+import { DEFAULT_SETTINGS } from "~/components/TextEditor/settings";
 
 type SettingsContextShape = {
   setOption: (name: SettingName, value: boolean) => void;
