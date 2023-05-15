@@ -8,12 +8,13 @@ import ReactFlow, {
 } from "reactflow";
 import CustomEdge, { ConnectionEdge } from "./Edge";
 import { TextUpdaterNode } from "./Node";
+import { BridgeNode } from "./BridgeNode";
 import { type Node as CustomNode } from "@prisma/client";
 import { shallow } from "zustand/shallow";
 import useStore, { type RFState } from "./store";
 import { MinusSmallIcon, PlusSmallIcon } from "@heroicons/react/20/solid";
 
-const nodeTypes = { node: TextUpdaterNode };
+const nodeTypes = { node: TextUpdaterNode, bridge: BridgeNode };
 
 const edgeTypes: EdgeTypes = {
   default: CustomEdge,

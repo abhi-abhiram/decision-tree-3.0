@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import useWorkspaceStore from "~/store/workspace";
 import { api } from "~/utils/api";
 import { Button } from "../ui/Button";
-import Modal from "../ui/Model";
+import Modal from "../ui/Modal";
 import { Textinput } from "../ui/Textinput";
 import React from "react";
 

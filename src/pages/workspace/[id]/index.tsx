@@ -10,9 +10,9 @@ import { Dropdown, MenuGroup, MenuItem } from "~/components/ui/Dropdown";
 import Layout from "~/components/ui/Layout";
 import { Main } from "~/components/ui/Main";
 import { cn } from "~/utils";
-import { Nav } from "../..";
+import { WorkspaceNav } from "../..";
 import Link from "next/link";
-import Modal from "~/components/ui/Model";
+import Modal from "~/components/ui/Modal";
 import { Textinput } from "~/components/ui/Textinput";
 import {
   ChevronDownIcon,
@@ -165,7 +165,7 @@ export default function Workspace() {
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <Nav isShowing={navShowing} setIsShowing={setNavShowing} />
+        <WorkspaceNav isShowing={navShowing} setIsShowing={setNavShowing} />
         <Main>
           <div className="flex h-full flex-col">
             <div className="sticky top-0">

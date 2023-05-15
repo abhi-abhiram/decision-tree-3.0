@@ -12,9 +12,10 @@ import { useRouter } from "next/router";
 import { cn } from "~/utils";
 import { Main } from "~/components/ui/Main";
 import { Button } from "~/components/ui/Button";
-import Modal from "~/components/ui/Model";
+import Modal from "~/components/ui/Modal";
 import { api } from "~/utils/api";
 import { type Workspace } from "@prisma/client";
+import Nav from "~/components/ui/Nav";
 
 const WorkspacesLinks = ({ workspaces }: { workspaces: Workspace[] }) => {
   const router = useRouter();
@@ -38,7 +39,7 @@ const WorkspacesLinks = ({ workspaces }: { workspaces: Workspace[] }) => {
   );
 };
 
-export function Nav({
+export function WorkspaceNav({
   isShowing,
   setIsShowing,
 }: {
@@ -60,12 +61,7 @@ export function Nav({
         );
 
   return (
-    <nav
-      className={cn(
-        "relative scale-x-100 scroll-m-1 scroll-p-1 overflow-y-auto border-r border-gray-200 bg-white duration-200 ease-in-out",
-        isShowing ? "w-72" : "w-0 overflow-hidden p-0"
-      )}
-    >
+    <Nav isShowing={isShowing}>
       <div className="sticky top-0">
         <div className="relative h-10 bg-white">
           <div className={cn("absolute right-0 top-1 block")}>
@@ -102,7 +98,7 @@ export function Nav({
           <WorkspacesLinks workspaces={workspaces ?? []} />
         )}
       </div>
-    </nav>
+    </Nav>
   );
 }
 
@@ -187,7 +183,7 @@ export default function Home() {
         </div>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <Nav isShowing={isShowing} setIsShowing={setIsShowing} />
+        <WorkspaceNav isShowing={isShowing} setIsShowing={setIsShowing} />
         <Main>
           <div className="flex h-full items-center justify-center">
             <div>

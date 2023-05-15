@@ -12,10 +12,10 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "reactflow";
-import { type Tree, type Node as CustomNode } from "@prisma/client";
+import { type Tree, type Node, type BridgeNode } from "@prisma/client";
 import * as d3 from "d3-hierarchy";
 
-
+type CustomNode = Node | BridgeNode;
 
 export type RFState = {
   tree: Tree | null,
@@ -139,10 +139,8 @@ const useStore = create<RFState>((set, get) => ({
 
 export default useStore;
 
-export function getTreeLayout<
-  T extends { id: string; parentId: string | null }
->(nodes: T[]): [ReactFlowNode<T>[], Edge[], d3.HierarchyPointNode<T>] {
-  const resultNodes: ReactFlowNode<T>[] = [];
+export function getTreeLayout(nodes: CustomNode[]): [ReactFlowNode<CustomNode>[], Edge[], d3.HierarchyPointNode<CustomNode>] {
+  const resultNodes: ReactFlowNode<CustomNode>[] = [];
 
   const resultEdges: Edge[] = [];
 
@@ -166,14 +164,25 @@ export function getTreeLayout<
     node.x = node.y;
     node.y = x;
 
-    resultNodes.push({
-      id: node.data.id,
-      position: { x: node.x, y: node.y },
-      data: node.data,
-      draggable: false,
-      focusable: true,
-      type: "node"
-    });
+    if (node.data.type !== "BridgeType") {
+      resultNodes.push({
+        id: node.data.id,
+        position: { x: node.x, y: node.y },
+        data: node.data,
+        draggable: false,
+        focusable: true,
+        type: "node"
+      });
+    } else {
+      resultNodes.push({
+        id: node.data.id,
+        position: { x: node.x, y: node.y },
+        data: node.data,
+        draggable: false,
+        focusable: true,
+        type: "bridge"
+      })
+    }
 
     if (!node.parent?.id || !node.id) return;
 

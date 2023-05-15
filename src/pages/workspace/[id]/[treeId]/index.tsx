@@ -24,7 +24,7 @@ import { Textarea } from "~/components/ui/Textarea";
 import _ from "lodash";
 import Select from "~/components/ui/Select";
 import { Button } from "~/components/ui/Button";
-import Modal from "~/components/ui/Model";
+import Modal from "~/components/ui/Modal";
 import { api } from "~/utils/api";
 import { NodeTypeIcon } from "~/components/TreeEditor/NodeTypeIcon";
 import Loader from "~/components/ui/Loader";
@@ -36,6 +36,8 @@ import axios from "axios";
 import Options from "~/components/Options";
 import { useIsMutating } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
+import Nav from "~/components/ui/Nav";
+import AddNodeModal from "~/components/TreeEditor/AddNodeModal";
 
 function LeftNav({
   isShowing,
@@ -67,12 +69,7 @@ function LeftNav({
   }, [query, nodes]);
 
   return (
-    <nav
-      className={cn(
-        "relative h-full scale-x-100 scroll-m-1 scroll-p-1 overflow-y-auto border-r border-gray-200 bg-white duration-200 ease-in-out",
-        isShowing ? "w-72" : "w-0 overflow-hidden p-0"
-      )}
-    >
+    <Nav isShowing={isShowing}>
       <div className="sticky top-0">
         <div className="relative h-10 bg-white">
           <div className={cn("absolute right-0 top-1 block")}>
@@ -119,22 +116,28 @@ function LeftNav({
               <NodeTypeIcon type={val.data.type} />
               <div className="flex flex-1 flex-col gap-1 overflow-hidden">
                 <span className="text-sm font-medium">{val.data.name}</span>
-                <div className="flex-1 overflow-hidden text-xs font-light">
-                  {_.truncate(val.data.question, {
-                    length: 90,
-                    separator: /,? +/,
-                  })}
-                </div>
+                {val.data.type !== "BridgeType" && (
+                  <div className="flex-1 overflow-hidden text-xs font-light">
+                    {_.truncate(val.data.question, {
+                      length: 90,
+                      separator: /,? +/,
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
-    </nav>
+    </Nav>
   );
 }
 
-const options: { label: string; value: NodeType; icon: React.ReactNode }[] = [
+export const options: {
+  label: string;
+  value: NodeType;
+  icon: React.ReactNode;
+}[] = [
   {
     label: "MultiInput",
     value: "MultiInput",
@@ -181,7 +184,9 @@ function RightNav({
     })
   );
   const [selected, setSelected] = React.useState<NodeType | null>(
-    selectedNode?.data.type ?? null
+    (selectedNode?.data.type !== "BridgeType"
+      ? selectedNode?.data.type
+      : null) ?? null
   );
   const router = useRouter();
   const [question, setQuestion] = React.useState<string | null>(null);
@@ -196,11 +201,15 @@ function RightNav({
   );
 
   React.useEffect(() => {
-    if (selectedNode) {
+    if (selectedNode && selectedNode.data.type !== "BridgeType") {
       setQuestion(selectedNode.data.question);
       setSelected(selectedNode.data.type);
     }
   }, [selectedNode]);
+
+  if (selectedNode?.data.type === "BridgeType") {
+    return null;
+  }
 
   return (
     <nav
@@ -224,7 +233,7 @@ function RightNav({
                 onChange={(event) => {
                   setQuestion(event.target.value);
 
-                  if (selectedNode) {
+                  if (selectedNode && selectedNode.data.type !== "BridgeType") {
                     selectedNode.data.question = event.target.value;
                     void updateNode(
                       {
@@ -246,7 +255,7 @@ function RightNav({
               options={options}
               selected={selected ?? null}
               setSelected={(val) => {
-                if (selectedNode) {
+                if (selectedNode && selectedNode.data.type !== "BridgeType") {
                   selectedNode.data.type = val;
                   void updateNode(
                     {
@@ -311,11 +320,6 @@ export default function Tree() {
       setTree,
     })
   );
-
-  const isNewNodeFetching = useIsMutating({
-    mutationKey: getQueryKey(api.node.create),
-  });
-
   const tree = api.tree.get.useQuery(
     {
       id: router.query.treeId as string,
@@ -324,7 +328,7 @@ export default function Tree() {
       onSuccess(data) {
         if (data) {
           setTree(data);
-          setNodesAndEdges(data.nodes);
+          setNodesAndEdges([...data.nodes, ...data.bridgeNodes]);
         }
       },
       enabled: !!router.query.treeId,
@@ -389,11 +393,6 @@ export default function Tree() {
             setIsShowing={setLeftNavShowing}
           />
           <Main className="relative p-0">
-            {isNewNodeFetching > 0 && (
-              <div className="absolute inset-0 z-10 flex h-full w-full items-center justify-center bg-white bg-opacity-50">
-                <Loader className="h-8 w-8" />
-              </div>
-            )}
             <DisplayTree />
           </Main>
           <RightNav
@@ -404,6 +403,7 @@ export default function Tree() {
           />
         </ReactFlowProvider>
       </div>
+      <AddNodeModal />
     </Layout>
   );
 }
@@ -453,6 +453,10 @@ function UploadImage() {
         });
     }
   }, [value]);
+
+  if (selectedNode?.data.type === "BridgeType") {
+    return null;
+  }
 
   return (
     <>
@@ -540,7 +544,10 @@ function UploadImage() {
               onClick={() => {
                 const uploadfiles = async () => {
                   setUploadLoading(true);
-                  if (selectedNode) {
+                  if (
+                    selectedNode &&
+                    selectedNode?.data.type !== "BridgeType"
+                  ) {
                     if (files.length > 0) {
                       const value = (await startUpload()) as {
                         fileKey: string;
@@ -583,9 +590,9 @@ function UploadImage() {
                   }
 
                   setUploadLoading(false);
-                };
 
-                void uploadfiles();
+                  void uploadfiles();
+                };
               }}
               isloading={uploadLoding}
             >

@@ -36,7 +36,8 @@ export const treeRouter = createTRPCRouter({
                 id: input.id
             },
             include: {
-                nodes: true
+                nodes: true,
+                bridgeNodes: true,
             }
         })
 

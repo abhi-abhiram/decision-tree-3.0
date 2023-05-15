@@ -4,6 +4,7 @@ import { folderRouter } from "./routers/folder";
 import { treeRouter } from "./routers/tree";
 import { nodeRouter } from "./routers/node";
 import { optionRouter } from "./routers/option";
+import { bridgeRouter } from "./routers/bridge";
 
 /**
  * This is the primary router for your server.
@@ -16,7 +17,7 @@ export const appRouter = createTRPCRouter({
   tree: treeRouter,
   node: nodeRouter,
   option: optionRouter,
-
+  bridge: bridgeRouter
 });
 
 // export type definition of API

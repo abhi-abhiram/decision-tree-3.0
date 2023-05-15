@@ -1,33 +1,16 @@
 import {
-  ArrowRightCircleIcon,
-  Bars3CenterLeftIcon,
-  CalendarIcon,
-  ChevronUpDownIcon,
+  CubeTransparentIcon,
   EllipsisVerticalIcon,
-  EnvelopeIcon,
 } from "@heroicons/react/20/solid";
 import React from "react";
 import { Handle, Position, useReactFlow } from "reactflow";
 import { type NodeProps } from "reactflow";
-import { type NodeType, type Node as CustomNode } from "@prisma/client";
+import { type BridgeNode } from "@prisma/client";
 import { Dropdown, MenuGroup, MenuItem } from "../ui/Dropdown";
 import { cn } from "~/utils";
 import useStore from "./store";
 import { api } from "~/utils/api";
 import useNodeSelectStore from "~/store/nodeSelect";
-
-const icons: Record<NodeType, React.ReactNode> = {
-  MultiInput: <Bars3CenterLeftIcon className="h-5 w-5  text-indigo-400" />,
-  Date: <CalendarIcon className="h-5 w-5 text-blue-400" />,
-  MultipleChoice: <ChevronUpDownIcon className="h-5 w-5 text-yellow-400" />,
-  SingleInput: <ArrowRightCircleIcon className="h-5 w-5 text-purple-400" />,
-  Number: (
-    <span className="flex h-5 w-5 items-center justify-center text-teal-400">
-      123
-    </span>
-  ),
-  Select: <ChevronUpDownIcon className="h-5 w-5 text-orange-400" />,
-};
 
 export function InputEditable(props: {
   editable: boolean;
@@ -84,7 +67,7 @@ export function InputEditable(props: {
   );
 }
 
-export function TextUpdaterNode(props: NodeProps<CustomNode>) {
+export function BridgeNode(props: NodeProps<BridgeNode>) {
   const { setCenter } = useReactFlow();
   const { editNode, tree, deleteNode, selectedNode, setNode } = useStore(
     (state) => ({
@@ -97,11 +80,10 @@ export function TextUpdaterNode(props: NodeProps<CustomNode>) {
     })
   );
   const [rename, setRename] = React.useState(false);
-  const { mutateAsync: editNodeMutation } = api.node.update.useMutation();
-  const { mutateAsync: deleteNodeMutation } = api.node.delete.useMutation();
-  const { setAddNodeShowing } = useNodeSelectStore(({ setAddNodeShowing }) => ({
-    setAddNodeShowing,
-  }));
+  const { mutateAsync: editNodeMutation } =
+    api.bridge.updateBridgeNode.useMutation();
+  const { mutateAsync: deleteNodeMutation } =
+    api.bridge.deleteBridgeNode.useMutation();
 
   return (
     <div
@@ -119,7 +101,7 @@ export function TextUpdaterNode(props: NodeProps<CustomNode>) {
     >
       <div className="flex h-full flex-1 items-center gap-2">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-          {icons[props.data.type]}
+          <CubeTransparentIcon className={"h-5 w-5"} />
         </div>
         <div className="flex h-full flex-1 flex-col items-stretch justify-center">
           <InputEditable
@@ -145,22 +127,6 @@ export function TextUpdaterNode(props: NodeProps<CustomNode>) {
           }
           className="nopan top-0 z-[100] mt-0 w-24 translate-x-8"
         >
-          <MenuGroup>
-            <MenuItem
-              onClick={() => {
-                if (!tree?.id) return;
-                if (selectedNode?.id !== props.id) {
-                  setNode({
-                    ...props,
-                    position: { x: props.xPos, y: props.yPos },
-                  });
-                }
-                setAddNodeShowing(true);
-              }}
-            >
-              {() => <span>Add Node</span>}
-            </MenuItem>
-          </MenuGroup>
           <MenuGroup>
             <MenuItem
               onClick={() => {

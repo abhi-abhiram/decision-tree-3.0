@@ -31,7 +31,7 @@ import { Button } from "~/components/ui/Button";
 // import { DialogActions, DialogButtonsList } from "../../ui/Dialog";
 // import FileInput from "../../ui/FileInput";
 import { Textinput as TextInput } from "~/components/ui/Textinput";
-import Modal from "~/components/ui/Model";
+import Modal from "~/components/ui/Modal";
 
 export type InsertImagePayload = Readonly<ImagePayload>;
 

@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { cn } from "~/utils";
 
 interface ModelProps
@@ -11,6 +11,8 @@ interface ModelProps
   bgClassName?: string;
   initialFocus?: React.MutableRefObject<HTMLElement | null>;
   titleClassName?: string;
+  dialogClassName?: string;
+  position?: "top" | "center";
 }
 
 export default function Modal({
@@ -22,12 +24,13 @@ export default function Modal({
   className,
   initialFocus,
   titleClassName,
+  position,
 }: ModelProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="relative z-10"
+        className={cn("relative z-10", className)}
         onClose={setIsOpen}
         initialFocus={initialFocus}
       >
@@ -44,9 +47,13 @@ export default function Modal({
             className={cn("fixed inset-0 bg-black bg-opacity-25", bgClassName)}
           />
         </Transition.Child>
-
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div
+            className={cn(
+              "flex min-h-full justify-center p-4 text-center",
+              position === "top" ? "items-start" : "items-center"
+            )}
+          >
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"

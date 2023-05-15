@@ -3,12 +3,16 @@ import {
   Bars3CenterLeftIcon,
   CalendarIcon,
   ChevronUpDownIcon,
+  CubeTransparentIcon,
 } from "@heroicons/react/20/solid";
-import { type NodeType } from "@prisma/client";
+import { type BridgeType, type NodeType } from "@prisma/client";
 import { cn } from "~/utils";
 
-export function NodeTypeIcon(props: { type: NodeType; className?: string }) {
-  const icons: Record<NodeType, React.ReactNode> = {
+export function NodeTypeIcon(props: {
+  type: NodeType | BridgeType;
+  className?: string;
+}) {
+  const icons: Record<(typeof props)["type"], React.ReactNode> = {
     MultiInput: (
       <span className="bg-greeen-400 flex items-center justify-center rounded-md bg-indigo-400 p-1 text-black">
         <Bars3CenterLeftIcon className={cn("h-5 w-5", props.className)} />
@@ -37,6 +41,11 @@ export function NodeTypeIcon(props: { type: NodeType; className?: string }) {
     Select: (
       <span className="flex items-center justify-center rounded-md bg-orange-400 p-1 text-black">
         <ChevronUpDownIcon className={cn("h-5 w-5", props.className)} />
+      </span>
+    ),
+    BridgeType: (
+      <span className="flex items-center justify-center rounded-md bg-red-400 p-1 text-black">
+        <CubeTransparentIcon className={cn("h-5 w-5", props.className)} />
       </span>
     ),
   };
