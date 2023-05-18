@@ -7,6 +7,7 @@ export const ZCreateNodeInput = z.object({
     treeId: z.string(),
     parentId: z.string().optional(),
     type: z.nativeEnum(NodeType),
+    child: z.string().optional(),
 })
 
 export const ZUpdateNodeInput = z.object({

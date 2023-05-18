@@ -32,6 +32,7 @@ export type RFState = {
   editNode: (editNode: CustomNode) => void;
   setTree: (tree: Tree) => void;
   setSelectedNode: (node: ReactFlowNode<CustomNode>) => void;
+  changeParent: (nodeId: string, newParentId: string) => void;
 };
 
 const useStore = create<RFState>((set, get) => ({
@@ -133,9 +134,30 @@ const useStore = create<RFState>((set, get) => ({
     set({
       selectedNode: node,
     });
-  }
+  },
+  changeParent(nodeId, newParentId) {
+    const oldNodes = get().nodes.map((node) => {
+      return {
+        ...node.data,
+      };
+    });
 
-}));
+    const [newNodes, newEdges, tree] = getTreeLayout(oldNodes.map((node) => {
+      if (node.id === nodeId) {
+        node.parentId = newParentId;
+      }
+
+      return node;
+    }));
+
+    set({
+      nodes: newNodes,
+      edges: newEdges,
+      d3Tree: tree,
+    });
+  },
+}
+));
 
 export default useStore;
 

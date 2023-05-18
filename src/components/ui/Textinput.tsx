@@ -5,17 +5,19 @@ import { cn } from "~/utils";
 
 const textinputVariants = cva("relative w-full text-gray-400 bg-white", {
   variants: {
-    variant: {
-      default:
-        "border-2 border-gray-300 rounded-lg focus-within:border-blue-500 transition-colors ease-in-out duration-200",
-      error:
-        "border-2 border-red-600 rounded-lg focus-within:border-red-600 text-red-600",
-    },
     size: {
       default: "h-10 px-3",
       sm: "text-sm h-8 px-2",
       lg: "text-lg h-12 px-4",
       xl: "text-xl h-14 px-5",
+    },
+    variant: {
+      default:
+        "border-2 border-gray-300 rounded-lg focus-within:border-blue-500 transition-colors ease-in-out duration-200",
+      error:
+        "border-2 border-red-600 rounded-lg focus-within:border-red-600 text-red-600",
+      flushed:
+        "border-0 rounded-none border-b-2 pl-0 border-gray-300 focus-within:border-blue-500 transition-colors ease-in-out duration-200",
     },
     leftIconSize: {
       default: "pl-10",
@@ -28,6 +30,9 @@ const textinputVariants = cva("relative w-full text-gray-400 bg-white", {
       sm: "pr-8",
       lg: "pr-12",
       xl: "pr-14",
+    },
+    isError: {
+      true: "border-red-600 focus-within:border-red-600 [&>*]:text-red-600",
     },
   },
 
@@ -85,6 +90,7 @@ export const Textinput = React.forwardRef<HTMLInputElement, TextinputProps>(
       leftIcon,
       isRightIconClickable,
       leftIconLoading,
+      isError,
       ...props
     },
     ref
@@ -94,8 +100,9 @@ export const Textinput = React.forwardRef<HTMLInputElement, TextinputProps>(
         <div
           className={cn(
             textinputVariants({
-              variant,
               size,
+              variant,
+              isError,
               className,
               leftIconSize: leftIcon ? size ?? "default" : undefined,
               rightIconSize: rightIcon ? size ?? "default" : undefined,
@@ -143,7 +150,7 @@ export const Textinput = React.forwardRef<HTMLInputElement, TextinputProps>(
             {...props}
             ref={ref}
             variant="unstyled"
-            className="peer h-full p-0 "
+            className="peer h-full p-0"
           />
           {rightIcon && (
             <div
@@ -159,7 +166,7 @@ export const Textinput = React.forwardRef<HTMLInputElement, TextinputProps>(
             </div>
           )}
         </div>
-        {error && <p className="mt-2 text-sm ">{error}</p>}
+        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </div>
     );
   }

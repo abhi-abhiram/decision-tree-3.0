@@ -10,11 +10,9 @@ import FormSelect from "./Select";
 import FormTextarea from "./Textarea";
 import { type DisplayTreeStore } from "../displayTreeStore";
 
-export default function TreeForm({
+export default function NodeForm({
   onSubmit,
   node: { type, ...node },
-  isDisabled,
-  isLast,
 }: {
   onSubmit: (
     value: {
@@ -23,8 +21,6 @@ export default function TreeForm({
     formikHelpers: FormikHelpers<{ value: string; option?: Option }>
   ) => void;
   node: DisplayTreeStore["nodes"][number];
-  isDisabled?: boolean;
-  isLast?: boolean;
 }) {
   const options = React.useMemo(() => {
     return (
@@ -63,23 +59,32 @@ export default function TreeForm({
       >
         {({ isSubmitting }) => (
           <Form>
-            <div className="flex flex-col gap-2">
-              <div>
-                <p className="text-sm font-medium">{node.question}</p>
-              </div>
+            <div className="flex max-h-full w-full flex-col gap-3">
+              <p className="left-1 text-2xl font-light">{node.question}</p>
               {type === "Date" && <Date name="value" />}
-              {type === "Number" && <FormInput name="value" type="number" />}
-              {type === "SingleInput" && <FormInput name="value" type="text" />}
+              {type === "Number" && (
+                <FormInput variant="flushed" name="value" type="number" />
+              )}
+              {type === "SingleInput" && (
+                <FormInput
+                  size={"xl"}
+                  variant="flushed"
+                  name="value"
+                  type="text"
+                />
+              )}
               {(type === "MultipleChoice" || type === "Select") && (
                 <FormSelect name="value" options={options} />
               )}
               {type === "MultiInput" && <FormTextarea name="value" />}
-              <div className="flex gap-2 self-center">
-                <Button type="reset" variant="secondary">
-                  Reset
-                </Button>
-                <Button type="submit" isloading={isSubmitting}>
-                  {isLast ? "Submit" : "Next"}
+              <div className="flex justify-start">
+                <Button
+                  size="lg"
+                  type="submit"
+                  className="rounded shadow-lg"
+                  isloading={isSubmitting}
+                >
+                  Next
                 </Button>
               </div>
             </div>

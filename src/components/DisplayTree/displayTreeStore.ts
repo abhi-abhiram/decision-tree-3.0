@@ -1,5 +1,8 @@
 import { create } from "zustand";
-import { type RouterOutputs } from "~/utils/api"
+import { type RouterOutputs } from "~/utils/api";
+
+
+type Node = RouterOutputs['tree']['getRootNode'];
 
 export type Answer = {
     nodeId: string;
@@ -9,33 +12,48 @@ export type Answer = {
 }
 
 export type DisplayTreeStore = {
-    tree: RouterOutputs['tree']['onlyTree'] | null,
-    setTree: (tree: DisplayTreeStore['tree']) => void;
-    answers: Answer[];
-    setAnswers: (answer: Answer) => void;
-    nodes: Exclude<RouterOutputs['node']['get'], null>[];
-    addNode: (node: DisplayTreeStore['nodes'][number]) => void;
+    answers: Map<string, Answer>;
+    nodes: Node[];
+    setNodes: (nodes: Node[]) => void;
+    addNode: (node: Node) => void;
+    addAnswer: (answer: Answer) => void;
+    updateAnswer: (answer: Answer) => void;
+    deleteAnswer: (answer: Answer) => void;
+    currentNodeIndex: number;
+    setCurrentNodeIndex: (index: number) => void;
 };
 
 
 export const useDisplayTreeStore = create<DisplayTreeStore>((set, get) => ({
-    tree: null,
-    setTree: (tree) => {
-        const rootNode = tree?.rootNode;
-        const nodes = get().nodes;
-        if (rootNode && nodes.length === 0) {
-            set({ nodes: [...nodes, rootNode] });
-        }
-        set({ tree })
+    answers: new Map(),
+    currentNodeIndex: 0,
+    addAnswer: (answer) => {
+        const answers = get().answers;
+        answers.set(answer.nodeId, answer);
+        set({ answers: new Map(answers) });
     },
-    answers: [],
-    setAnswers: (answer) => {
-        const oldAnswers = get().answers;
-        set({ answers: [...oldAnswers, answer] });
+    updateAnswer: (answer) => {
+        const answers = get().answers;
+        answers.set(answer.nodeId, answer);
+        set({ answers: new Map(answers) });
+    },
+    deleteAnswer: (answer) => {
+        const answers = get().answers;
+        answers.delete(answer.nodeId);
+        set({ answers: new Map(answers) });
+    },
+    setNodes: (nodes) => {
+        set({ nodes });
     },
     nodes: [],
     addNode: (node) => {
         const nodes = get().nodes;
         set({ nodes: [...nodes, node] });
     }
+    ,
+    setCurrentNodeIndex: (index) => {
+        set({ currentNodeIndex: index });
+    }
+
+
 }));

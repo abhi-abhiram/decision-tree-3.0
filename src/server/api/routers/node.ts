@@ -3,7 +3,10 @@ import { publicProcedure, createTRPCRouter } from "../trpc";
 import { z } from "zod";
 
 export const nodeRouter = createTRPCRouter({
-    create: publicProcedure.input(ZCreateNodeInput).mutation(async ({ ctx, input }) => {
+    create: publicProcedure.input(ZCreateNodeInput).mutation(async ({ ctx, input: { child, ...input } }) => {
+
+
+
         const node = await ctx.prisma.node.create({
             data: {
                 ...input,
@@ -11,6 +14,16 @@ export const nodeRouter = createTRPCRouter({
         }
         )
 
+        if (child) {
+            await ctx.prisma.node.update({
+                where: {
+                    id: child
+                },
+                data: {
+                    parentId: node.id
+                }
+            })
+        }
         return node
     }),
 
@@ -80,7 +93,5 @@ export const nodeRouter = createTRPCRouter({
         return node
     }
     ),
-
-
 
 })

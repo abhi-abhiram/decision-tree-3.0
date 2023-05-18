@@ -5,6 +5,8 @@ export type INodeSelect = {
     setTree: (tree: INodeSelect['tree']) => void;
     addNodeShowing: boolean;
     setAddNodeShowing: (addNodeShowing: boolean) => void;
+    inBetween: { parentNode: string, childNode: string } | null;
+    setBetween: (inBetween: INodeSelect['inBetween']) => void;
 }
 
 const useNodeSelectStore = create<INodeSelect>((set) => ({
@@ -12,6 +14,8 @@ const useNodeSelectStore = create<INodeSelect>((set) => ({
     setTree: (tree) => set({ tree }),
     addNodeShowing: false,
     setAddNodeShowing: (addNodeShowing) => set({ addNodeShowing }),
+    inBetween: null,
+    setBetween: (inBetween) => set({ inBetween }),
 }));
 
 export default useNodeSelectStore;

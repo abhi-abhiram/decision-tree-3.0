@@ -1,5 +1,8 @@
 import Datepicker from "react-tailwindcss-datepicker";
-import { type DateType } from "react-tailwindcss-datepicker/dist/types";
+import {
+  type PopoverDirectionType,
+  type DateType,
+} from "react-tailwindcss-datepicker/dist/types";
 import { useField } from "formik";
 import React from "react";
 
@@ -20,7 +23,8 @@ export default function Date({ name, ...props }: { name: string }) {
           if (value?.startDate) helpers.setValue(value.startDate);
         }}
         inputName="date"
-        inputClassName="border border-gray-200 rounded-lg text-sm w-full p-2 shadow-sm"
+        inputClassName="border-b-2 border-gray-200 text-xl w-full p-2 shadow-sm outline-none focus:border-blue-500"
+        popoverDirection={"down" as PopoverDirectionType}
       />
       {meta.error && meta.touched ? (
         <div className="text-sm text-red-500">{meta.error}</div>

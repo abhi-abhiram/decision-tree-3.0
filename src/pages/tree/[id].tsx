@@ -6,49 +6,51 @@ import {
   useDisplayTreeStore,
 } from "~/components/DisplayTree/displayTreeStore";
 import Loader from "~/components/ui/Loader";
-import { cn } from "~/utils";
 import { api } from "~/utils/api";
 import download from "js-file-download";
 import Drawer from "~/components/ui/Drawer";
 import { Button } from "~/ui/Button";
 
 function Tree() {
-  const { setTree, setAnswers, nodes, addNode, answers } = useDisplayTreeStore(
-    ({ setTree, setAnswers, nodes, addNode, tree, answers }) => ({
-      setTree,
-      setAnswers,
+  const {
+    nodes,
+    addNode,
+    answers,
+    currentNodeIndex,
+    addAnswer,
+    setCurrentNodeIndex,
+  } = useDisplayTreeStore(
+    ({
       nodes,
       addNode,
-      tree,
       answers,
+      currentNodeIndex,
+      addAnswer,
+      setCurrentNodeIndex,
+    }) => ({
+      nodes,
+      addNode,
+      answers,
+      currentNodeIndex,
+      addAnswer,
+      setCurrentNodeIndex,
     })
   );
   const router = useRouter();
-  const { data: tree, isLoading } = api.tree.onlyTree.useQuery(
-    { id: router.query.id as string },
+  const { data: rootNode, isLoading } = api.tree.getRootNode.useQuery(
+    {
+      id: router.query.id as string,
+    },
     {
       enabled: !!router.query.id,
+      refetchOnWindowFocus: false,
       onSuccess: (data) => {
-        if (!data) {
-          alert("This tree does not exist");
-          void router.push("/");
-          return;
-        }
-        setTree(data);
+        if (nodes.length === 0) addNode(data);
       },
     }
   );
   const utils = api.useContext();
-  const scrollToBottom = React.useRef<HTMLDivElement>(null);
   const [isHelpPanelOpen, setIsHelpPanelOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    if (scrollToBottom.current) {
-      scrollToBottom.current.scrollIntoView({
-        behavior: "smooth",
-      });
-    }
-  }, [nodes]);
 
   if (isLoading)
     return (
@@ -57,101 +59,92 @@ function Tree() {
       </div>
     );
 
-  if (!tree) {
-    return null;
-  }
+  if (!rootNode) return null;
+
+  const currentNode = nodes[currentNodeIndex];
 
   return (
     <>
       <div className="cneter flex h-screen flex-col items-center">
-        <div className="self-end p-2">
+        <div className="relative w-full">
           <Button
             variant="secondary"
             onClick={() => {
               setIsHelpPanelOpen(true);
             }}
+            className="absolute right-2 top-2"
           >
             Help
           </Button>
         </div>
-        <div className="flex w-1/2 flex-1 flex-col gap-1 ">
-          {<div className="flex-1" />}
-          {nodes.map((node, index) => (
-            <div
-              key={node.id}
-              className={cn(
-                index !== nodes.length - 1 && "pointer-events-none opacity-50"
-              )}
-            >
-              <TreeForm
-                onSubmit={(val, { setSubmitting }) => {
-                  const submit = async () => {
-                    if (node._count.children !== 0) {
-                      let newNode: DisplayTreeStore["nodes"][number] | null;
-
-                      if (node.type === "MultipleChoice") {
-                        const option = node.options.find(
-                          (option) => option.id === val.value
-                        );
-                        if (!option) {
-                          alert("Invalid option");
-                          return;
+        <div className="flex h-full w-full flex-1 items-center justify-center">
+          <div className="flex h-3/4 w-3/4 items-center justify-center border border-gray-200 shadow-md">
+            <div className="flex h-5/6 w-5/6 items-center overflow-auto rounded ">
+              <div className="flex max-h-full w-full flex-col gap-3">
+                {currentNode && (
+                  <TreeForm
+                    key={currentNode.id}
+                    onSubmit={(val, { setSubmitting }) => {
+                      const submit = async () => {
+                        if (currentNode._count.children !== 0) {
+                          let newNode: DisplayTreeStore["nodes"][number] | null;
+                          if (currentNode.type === "MultipleChoice") {
+                            const option = currentNode.options.find(
+                              (option) => option.id === val.value
+                            );
+                            if (!option) {
+                              alert("Invalid option");
+                              return;
+                            }
+                            if (option.nextNodeId) {
+                              newNode = await utils.node.get.fetch({
+                                id: option.nextNodeId,
+                              });
+                              val.value = option.value;
+                            } else {
+                              newNode = null;
+                            }
+                          } else {
+                            newNode = await utils.node.getSingleChild.fetch({
+                              id: currentNode.id,
+                            });
+                          }
+                          if (newNode) {
+                            addNode(newNode);
+                          }
                         }
-                        if (option.nextNodeId) {
-                          newNode = await utils.node.get.fetch({
-                            id: option.nextNodeId,
-                          });
-                          val.value = option.value;
-                        } else {
-                          newNode = null;
+                        const newAns = {
+                          nodeId: currentNode.id,
+                          answer: val.value,
+                          nodeName: currentNode.name,
+                          question: currentNode.question,
+                        };
+                        addAnswer(newAns);
+
+                        if (currentNode._count.children === 0) {
+                          download(
+                            JSON.stringify([...answers, newAns], null, 2),
+                            "answers.json",
+                            "text/plain"
+                          );
                         }
-                      } else {
-                        newNode = await utils.node.getSingleChild.fetch({
-                          id: node.id,
-                        });
-                      }
-
-                      if (newNode) {
-                        addNode(newNode);
-                      }
-                    }
-                    const newAns = {
-                      nodeId: node.id,
-                      answer: val.value,
-                      nodeName: node.name,
-                      question: node.question,
-                    };
-
-                    setAnswers(newAns);
-
-                    if (node._count.children === 0) {
-                      download(
-                        JSON.stringify([...answers, newAns], null, 2),
-                        "answers.json",
-                        "text/plain"
-                      );
-                    }
-
-                    setSubmitting(false);
-                  };
-                  void submit();
-                }}
-                node={node}
-                isDisabled={index !== nodes.length - 1}
-                isLast={node._count.children === 0}
-              />
+                        setCurrentNodeIndex(currentNodeIndex + 1);
+                        setSubmitting(false);
+                      };
+                      void submit();
+                    }}
+                    node={currentNode}
+                  />
+                )}
+              </div>
             </div>
-          ))}
-
-          <div style={{ float: "left", clear: "both" }} ref={scrollToBottom} />
-          {nodes.length > 0 && <div className="h-72" />}
+          </div>
         </div>
       </div>
-
       <Drawer
         isShowing={isHelpPanelOpen}
         setIsShowing={setIsHelpPanelOpen}
-        title={tree.name}
+        title={"Help"}
       >
         <div
           className="content"

@@ -21,16 +21,20 @@ import useStore from "./store";
 import Loader from "../ui/Loader";
 
 export default function AddNodeModal() {
-  const { addNodeShowing, setAddNodeShowing } = useNodeSelectStore(
-    ({ addNodeShowing, setAddNodeShowing }) => ({
-      addNodeShowing,
-      setAddNodeShowing,
-    })
-  );
-  const { addNode, tree, selectedNode } = useStore((state) => ({
+  const { addNodeShowing, setAddNodeShowing, inBetween, setBetween } =
+    useNodeSelectStore(
+      ({ addNodeShowing, setAddNodeShowing, inBetween, setBetween }) => ({
+        addNodeShowing,
+        setAddNodeShowing,
+        inBetween,
+        setBetween,
+      })
+    );
+  const { addNode, tree, selectedNode, changeParent } = useStore((state) => ({
     addNode: state.addNode,
     tree: state.tree,
     selectedNode: state.selectedNode,
+    changeParent: state.changeParent,
   }));
   const [name, setName] = React.useState("");
   const { mutateAsync: addNodeMutation, isLoading } =
@@ -39,6 +43,10 @@ export default function AddNodeModal() {
         addNode(data);
         setAddNodeShowing(false);
         setName("");
+        if (inBetween) {
+          changeParent(inBetween.childNode, data.id);
+          setBetween(null);
+        }
       },
     });
 
@@ -46,7 +54,10 @@ export default function AddNodeModal() {
     <Modal
       className="max-w-4xl rounded-md"
       isOpen={addNodeShowing}
-      setIsOpen={() => setAddNodeShowing(false)}
+      setIsOpen={() => {
+        setAddNodeShowing(false);
+        setBetween(null);
+      }}
       position="top"
     >
       <Tabs tabs={["Native Nodes", "Custom Nodes"]}>
@@ -68,6 +79,18 @@ export default function AddNodeModal() {
                   className="flex cursor-pointer items-center gap-2 rounded-md border border-gray-100 px-3 py-2 transition-colors duration-200 ease-in-out hover:bg-gray-100"
                   key={index}
                   onClick={() => {
+                    if (tree && inBetween) {
+                      void addNodeMutation({
+                        name,
+                        type: val.value,
+                        treeId: tree?.id,
+                        parentId: inBetween?.parentNode,
+                        question: "",
+                        child: inBetween?.childNode,
+                      });
+                      return;
+                    }
+
                     if (tree && selectedNode) {
                       void addNodeMutation({
                         name,

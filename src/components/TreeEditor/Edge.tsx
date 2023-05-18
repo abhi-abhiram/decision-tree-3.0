@@ -4,6 +4,7 @@ import {
   type EdgeProps,
   getBezierPath,
 } from "reactflow";
+import useNodeSelectStore from "~/store/nodeSelect";
 
 export default function DefaultEdge({
   id,
@@ -15,6 +16,8 @@ export default function DefaultEdge({
   targetPosition,
   style = {},
   markerEnd,
+  source,
+  target,
 }: EdgeProps) {
   const [edgePath] = getBezierPath({
     sourceX,
@@ -24,6 +27,13 @@ export default function DefaultEdge({
     targetY,
     targetPosition,
   });
+  const { setAddNodeShowing, setBetween } = useNodeSelectStore(
+    ({ setAddNodeShowing, setBetween, inBetween }) => ({
+      setAddNodeShowing,
+      setBetween,
+      inBetween,
+    })
+  );
 
   const iconX = (sourceX + targetX) / 2;
   const iconY = (sourceY + targetY) / 2;
@@ -40,7 +50,13 @@ export default function DefaultEdge({
       <g
         transform={`translate(${iconX}, ${iconY})`}
         style={{ cursor: "pointer" }}
-        onClick={() => console.log("af")}
+        onClick={() => {
+          setAddNodeShowing(true);
+          setBetween({
+            childNode: target,
+            parentNode: source,
+          });
+        }}
         className="group !pointer-events-auto [&>*]:transition-transform [&>*]:duration-200 [&>*]:ease-in-out"
       >
         <circle
@@ -75,12 +91,8 @@ export default function DefaultEdge({
 export function ConnectionEdge({
   fromX,
   fromY,
-  fromPosition,
   toX,
   toY,
-  toPosition,
-  connectionLineType,
-  connectionLineStyle,
 }: ConnectionLineComponentProps) {
   return (
     <g>

@@ -1,24 +1,23 @@
 import { useField } from "formik";
-import { Input, type InputProps } from "~/ui/Input";
+import { Textinput, type TextinputProps } from "~/components/ui/Textinput";
 
 export default function FormInput(
-  props: Omit<InputProps, "name"> & { name: string }
+  props: Omit<TextinputProps, "name"> & { name: string }
 ) {
   const [field, meta, helper] = useField<string>(props.name);
 
   return (
     <div className="flex flex-col gap-2">
-      <Input
+      <Textinput
         {...props}
         value={field.value}
         onChange={(e) => {
           helper.setValue(String(e.target.value));
         }}
         onBlur={field.onBlur}
+        isError={Boolean(meta.error && meta.touched)}
+        error={meta.error}
       />
-      {meta.error && meta.touched ? (
-        <div className="text-sm text-red-500">{meta.error}</div>
-      ) : null}
     </div>
   );
 }
