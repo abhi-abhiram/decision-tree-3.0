@@ -113,19 +113,19 @@ const Tab2 = () => {
     }
   );
   const {
-    treeid: selected,
-    setTreeid,
+    tree: selected,
+    setTree,
     setAddNodeShowing,
-  } = useNodeSelectStore(({ setTreeid, treeid, setAddNodeShowing }) => ({
-    treeid,
-    setTreeid,
+  } = useNodeSelectStore(({ setTree, tree, setAddNodeShowing }) => ({
+    tree,
+    setTree,
     setAddNodeShowing,
   }));
   const { mutateAsync: createBridge, isLoading } =
     api.bridge.createBridgeNode.useMutation({
       onSuccess(data) {
         addNode(data);
-        setTreeid(null);
+        setTree({ id: data.id, name: data.name });
         setAddNodeShowing(false);
       },
     });
@@ -155,8 +155,8 @@ const Tab2 = () => {
             if (tree && selectedNode && selected) {
               void createBridge({
                 fromTreeId: tree.id,
-                toTreeId: selected,
-                name: tree.name,
+                toTreeId: selected.id,
+                name: selected.name,
                 parentId: selectedNode.id,
               });
             }
@@ -270,21 +270,24 @@ const File = ({
   indent?: number;
   onContextMenu?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }) => {
-  const { setTreeid: setSelected, treeid: selected } = useNodeSelectStore(
-    ({ setTreeid, treeid }) => ({ treeid, setTreeid })
+  const { setTree: setSelected, tree: selected } = useNodeSelectStore(
+    ({ setTree, tree }) => ({ tree, setTree })
   );
 
   return (
     <div
       className={cn(
         "group flex flex-row items-center rounded-md py-2 font-medium transition-colors duration-200 ease-in-out odd:bg-gray-200 odd:bg-opacity-60",
-        selected === id &&
+        selected?.id === id &&
           "bg-blue-500 text-white odd:bg-blue-500 odd:bg-opacity-100"
       )}
       onClick={() => {
-        setSelected(id);
+        setSelected({
+          id,
+          name,
+        });
 
-        if (selected === id) {
+        if (selected?.id === id) {
           setSelected(null);
         }
       }}
@@ -303,7 +306,7 @@ const File = ({
         <div
           className={cn(
             "flex gap-1 pl-2 text-gray-500",
-            selected === id && "text-white"
+            selected?.id === id && "text-white"
           )}
         >
           <div className="h-4 w-4"></div>

@@ -9,6 +9,7 @@ import { Formik } from "formik";
 import { useMemo } from "react";
 import { toFormikValidationSchema } from "zod-formik-adapter";
 import { ZCreateOptionInput } from "~/zodObjs/option";
+import { type BridgeType, type NodeType } from "@prisma/client";
 
 export default function Options() {
   const { selectedNode, nodes } = useStore(
@@ -37,6 +38,7 @@ export default function Options() {
           label: val.data.name,
           value: val.id,
           icon: <NodeTypeIcon type={val.data.type} className="h-4 w-4" />,
+          type: val.data.type,
         })) ?? []
     );
   }, [selectedNode?.id, nodes]);
@@ -54,7 +56,10 @@ export default function Options() {
           variant={"secondary"}
           size={"sm"}
           onClick={() => {
-            if (!selectedNode) return;
+            if (!selectedNode) {
+              alert("Please select a node first");
+              return;
+            }
             if (nextNodeOptions?.length === 0) {
               alert("Please add a node first");
               return;
@@ -75,7 +80,11 @@ export default function Options() {
       {options?.map((option) => (
         <OptionForm
           key={option.id}
-          data={option}
+          data={{
+            ...option,
+            nextNodeId: option.bridgeId ?? option.nextNodeId,
+            type: option.bridgeId ? "bridgeNode" : "node",
+          }}
           onSubmit={async (data) => {
             await updateOption(data);
           }}
@@ -96,12 +105,14 @@ const initialValues: {
   value: string;
   nextNodeId: string | null;
   nodeId: string;
+  type: "node" | "bridgeNode";
 } = {
   id: "",
   label: "",
   value: "",
   nextNodeId: "",
   nodeId: "",
+  type: "node",
 };
 
 function OptionForm<T extends typeof initialValues>({
@@ -113,7 +124,9 @@ function OptionForm<T extends typeof initialValues>({
   data?: T;
   onSubmit: (data: T) => Promise<void>;
   onDelete?: () => Promise<void>;
-  nextNodeOptions: Option<string | number>[];
+  nextNodeOptions: (Option<string | number> & {
+    type: NodeType | BridgeType;
+  })[];
 }) {
   const { selectedNode } = useStore(({ selectedNode }) => ({
     selectedNode,
@@ -129,7 +142,6 @@ function OptionForm<T extends typeof initialValues>({
         } as T)
       }
       onSubmit={async (values, { setSubmitting }) => {
-        console.log(values);
         await onSubmit(values);
         setSubmitting(false);
       }}
@@ -196,6 +208,16 @@ function OptionForm<T extends typeof initialValues>({
                   options={nextNodeOptions}
                   selected={values.nextNodeId}
                   setSelected={function (val) {
+                    const option = nextNodeOptions.find(
+                      (option) => option.value === val
+                    );
+                    if (!option) return;
+
+                    if (option.type === "BridgeType") {
+                      setFieldValue("type", "bridgeNode");
+                    } else {
+                      setFieldValue("type", "node");
+                    }
                     setFieldValue("nextNodeId", val);
                   }}
                   selectBtnClass={cn(

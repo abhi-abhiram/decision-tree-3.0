@@ -8,7 +8,7 @@ import { Button } from "~/ui/Button";
 import { type Option } from "@prisma/client";
 import FormSelect from "./Select";
 import FormTextarea from "./Textarea";
-import { type DisplayTreeStore } from "../store";
+import { type DisplayTreeStore } from "../displayTreeStore";
 
 export default function TreeForm({
   onSubmit,

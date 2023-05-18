@@ -12,5 +12,6 @@ export const ZUpdateOptionInput = z.object({
     label: z.string().optional(),
     value: z.string().optional(),
     nextNodeId: z.string().nullish(),
+    type: z.enum(["node", "bridgeNode"]),
 })
 

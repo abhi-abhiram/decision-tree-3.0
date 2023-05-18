@@ -68,6 +68,7 @@ model BridgeNode {
     toTreeId   String
     toTree     Tree       @relation("BridgeTo", fields: [toTreeId], references: [id], onDelete: Cascade)
     type       BridgeType @default(BridgeType)
+    options    Option[]
 }
 
 model Folder {
@@ -84,17 +85,19 @@ model Folder {
 }
 
 model Option {
-    id         String    @id @default(cuid())
-    createdAt  DateTime  @default(now())
-    updatedAt  DateTime  @updatedAt
-    label      String    @default("")
-    value      String    @default("")
+    id         String      @id @default(cuid())
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @updatedAt
+    label      String      @default("")
+    value      String      @default("")
     nodeId     String
-    node       Node      @relation("NodeOptions", fields: [nodeId], references: [id], onDelete: Cascade)
+    node       Node        @relation("NodeOptions", fields: [nodeId], references: [id], onDelete: Cascade)
     nextNodeId String?
-    nextNode   Node?     @relation(fields: [nextNodeId], references: [id])
+    nextNode   Node?       @relation(fields: [nextNodeId], references: [id], onDelete: Cascade)
     varid      String?
-    var        Variable? @relation(fields: [varid], references: [id])
+    var        Variable?   @relation(fields: [varid], references: [id])
+    bridgeId   String?
+    bridge     BridgeNode? @relation(fields: [bridgeId], references: [id], onDelete: Cascade)
 }
 
 model Variable {

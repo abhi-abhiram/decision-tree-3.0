@@ -1,15 +1,15 @@
 import { create } from "zustand"
 
 export type INodeSelect = {
-    treeid: string | null;
-    setTreeid: (treeid: string | null) => void;
+    tree: { id: string, name: string } | null;
+    setTree: (tree: INodeSelect['tree']) => void;
     addNodeShowing: boolean;
     setAddNodeShowing: (addNodeShowing: boolean) => void;
 }
 
 const useNodeSelectStore = create<INodeSelect>((set) => ({
-    treeid: null,
-    setTreeid: (treeid) => set({ treeid }),
+    tree: null,
+    setTree: (tree) => set({ tree }),
     addNodeShowing: false,
     setAddNodeShowing: (addNodeShowing) => set({ addNodeShowing }),
 }));

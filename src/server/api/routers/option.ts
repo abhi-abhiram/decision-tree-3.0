@@ -5,8 +5,6 @@ import { ZCreateOptionInput, ZUpdateOptionInput } from "~/zodObjs/option";
 export const optionRouter = createTRPCRouter({
     create: publicProcedure.input(ZCreateOptionInput).mutation(async ({ ctx, input }) => {
 
-
-
         const option = await ctx.prisma.option.create({
             data: {
                 ...input,
@@ -18,13 +16,38 @@ export const optionRouter = createTRPCRouter({
     }
     ),
 
-    update: publicProcedure.input(ZUpdateOptionInput).mutation(async ({ ctx, input }) => {
+    update: publicProcedure.input(ZUpdateOptionInput).mutation(async ({ ctx, input: { type, ...input } }) => {
+        let bridgeNextNodeId: string | null = null;
+        if (type === "bridgeNode" && input.nextNodeId) {
+            bridgeNextNodeId = (await ctx.prisma.bridgeNode.findUnique({
+                where: {
+                    id: input.nextNodeId
+                },
+                select: {
+                    toTree: {
+                        select: {
+                            rootNodeId: true
+                        }
+                    }
+                }
+            }))?.toTree.rootNodeId ?? null;
+        }
+
         const option = await ctx.prisma.option.update({
             where: {
                 id: input.id
             },
             data: {
-                ...input
+                ...input,
+                ...(
+                    type === "bridgeNode" ? {
+                        bridgeId: input.nextNodeId,
+                        nextNodeId: bridgeNextNodeId,
+                    } : {
+                        nextNodeId: input.nextNodeId,
+                        bridgeId: null,
+                    }
+                ),
             }
         })
 

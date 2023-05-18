@@ -4,7 +4,7 @@ import TreeForm from "~/components/DisplayTree/FormComponents";
 import {
   type DisplayTreeStore,
   useDisplayTreeStore,
-} from "~/components/DisplayTree/store";
+} from "~/components/DisplayTree/displayTreeStore";
 import Loader from "~/components/ui/Loader";
 import { cn } from "~/utils";
 import { api } from "~/utils/api";

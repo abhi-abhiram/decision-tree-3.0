@@ -13,7 +13,6 @@ export const bridgeRouter = createTRPCRouter({
                 parentId: input.parentId,
                 fromTreeId: input.fromTreeId,
                 toTreeId: input.toTreeId,
-
             }
         })
 
