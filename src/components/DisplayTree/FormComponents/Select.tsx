@@ -1,14 +1,15 @@
 import { useField } from "formik";
 import React from "react";
-import Select, { type Option } from "~/ui/Select";
+import Select, { type SelectProps, type Option } from "~/ui/Select";
 
 export default function FormSelect({
   options,
   name,
+  ...props
 }: {
   options: Option<string>[];
   name: string;
-}) {
+} & Partial<SelectProps<string>>) {
   const [field, meta, helpers] = useField<string>(name);
 
   return (
@@ -20,6 +21,7 @@ export default function FormSelect({
         buttonProps={{
           onBlur: field.onBlur,
         }}
+        {...props}
       />
       {meta.error && meta.touched ? (
         <div className="text-sm text-red-500">{meta.error}</div>

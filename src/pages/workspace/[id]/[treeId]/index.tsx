@@ -34,8 +34,6 @@ import { generateReactHelpers } from "@uploadthing/react";
 import type { OurFileRouter } from "~/server/uploadthing";
 import axios from "axios";
 import Options from "~/components/Options";
-import { useIsMutating } from "@tanstack/react-query";
-import { getQueryKey } from "@trpc/react-query";
 import Nav from "~/components/ui/Nav";
 import AddNodeModal from "~/components/TreeEditor/AddNodeModal";
 
@@ -590,9 +588,8 @@ function UploadImage() {
                   }
 
                   setUploadLoading(false);
-
-                  void uploadfiles();
                 };
+                void uploadfiles();
               }}
               isloading={uploadLoding}
             >

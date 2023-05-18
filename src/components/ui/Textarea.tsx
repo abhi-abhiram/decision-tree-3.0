@@ -1,4 +1,4 @@
-import { cva, VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "class-variance-authority";
 import React from "react";
 import { cn } from "~/utils";
 
@@ -7,10 +7,11 @@ const textareaVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "outline-2 outline-gray-300 focus-visible:outline-blue-500 transition-colors ease-in-out duration-200",
+        default: "transition-colors ease-in-out duration-200",
         unstyled: "outline-none rounded-none",
         error: "outline-red-500",
+        flushed:
+          "border-2 border-gray-200 pl-0 focus:outline-none focus:border-blue-500 rounded",
       },
       size: {
         default: "text-md p-2",

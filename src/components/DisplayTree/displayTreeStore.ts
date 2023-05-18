@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { type RouterOutputs } from "~/utils/api";
 
-
 type Node = RouterOutputs['tree']['getRootNode'];
 
 export type Answer = {
@@ -9,7 +8,9 @@ export type Answer = {
     nodeName: string;
     answer: string;
     question: string;
+    multipleChoiceOption?: string;
 }
+
 
 export type DisplayTreeStore = {
     answers: Map<string, Answer>;
@@ -22,6 +23,7 @@ export type DisplayTreeStore = {
     currentNodeIndex: number;
     setCurrentNodeIndex: (index: number) => void;
 };
+
 
 
 export const useDisplayTreeStore = create<DisplayTreeStore>((set, get) => ({
@@ -54,6 +56,4 @@ export const useDisplayTreeStore = create<DisplayTreeStore>((set, get) => ({
     setCurrentNodeIndex: (index) => {
         set({ currentNodeIndex: index });
     }
-
-
 }));

@@ -7,17 +7,16 @@ export default function FormInput(
   const [field, meta, helper] = useField<string>(props.name);
 
   return (
-    <div className="flex flex-col gap-2">
-      <Textinput
-        {...props}
-        value={field.value}
-        onChange={(e) => {
-          helper.setValue(String(e.target.value));
-        }}
-        onBlur={field.onBlur}
-        isError={Boolean(meta.error && meta.touched)}
-        error={meta.error}
-      />
-    </div>
+    <Textinput
+      {...props}
+      value={field.value}
+      onChange={(e) => {
+        helper.setValue(String(e.target.value));
+      }}
+      onBlur={field.onBlur}
+      isError={Boolean(meta.error && meta.touched)}
+      error={meta.error}
+      className="w-full"
+    />
   );
 }

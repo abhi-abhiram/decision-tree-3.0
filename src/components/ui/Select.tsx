@@ -3,6 +3,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { cn } from "~/utils";
 import React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
 export type Option<T extends string | number> = {
   label: string;
@@ -10,7 +11,41 @@ export type Option<T extends string | number> = {
   icon?: React.ReactNode;
 };
 
-type SelectProps<T extends string | number> = {
+const selectVariants = cva(
+  "relative flex w-full cursor-default items-center bg-white  pr-10 text-left shadow-sm focus:outline-none sm:text-sm",
+  {
+    variants: {
+      size: {
+        default: "h-10 py-2 pl-3",
+        sm: "text-sm h-8 py-1 pl-2",
+        lg: "text-lg h-12 py-3 pl-4",
+        xl: "text-xl h-14 py-4 pl-5",
+      },
+      variant: {
+        default:
+          "rounded-lg border border-gray-200 focus-visible:border-blue-500 transition-colors ease-in-out duration-200 ",
+        flushed: "border-0 border-b-2 border-gray-200 rounded-none pl-0 ",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+);
+
+const labelVariants = cva("", {
+  variants: {
+    size: {
+      default: "",
+      sm: "text-sm",
+      lg: "text-lg",
+      xl: "text-xl",
+    },
+  },
+});
+
+interface Props<T extends string | number> {
   options: Option<T>[];
   selected: string | null;
   setSelected: (val: T) => void;
@@ -23,7 +58,12 @@ type SelectProps<T extends string | number> = {
   dropdownClass?: string;
   listboxClass?: string;
   placeholder?: string;
-} & { buttonProps?: React.ComponentPropsWithoutRef<"button"> };
+  buttonProps?: React.ComponentPropsWithoutRef<"button">;
+}
+
+export interface SelectProps<T extends string | number>
+  extends Props<T>,
+    VariantProps<typeof selectVariants> {}
 
 export default function Select<T extends string | number>({
   options,
@@ -31,6 +71,8 @@ export default function Select<T extends string | number>({
   setSelected,
   showValue = true,
   buttonProps,
+  variant,
+  size,
   ...props
 }: SelectProps<T>) {
   const selectedOption = React.useMemo(
@@ -43,7 +85,7 @@ export default function Select<T extends string | number>({
       <div className="relative">
         <Listbox.Button
           className={cn(
-            "relative flex w-full cursor-default items-center rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:outline-none focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm",
+            selectVariants({ variant, size }),
             ((selectedOption?.icon && props.showValueIcon) || props.leftIcon) &&
               "pl-10",
             !showValue && "pl-0",
@@ -75,7 +117,8 @@ export default function Select<T extends string | number>({
             <span
               className={cn(
                 "block truncate",
-                !selectedOption?.label && "text-gray-400"
+                !selectedOption?.label && "text-gray-400",
+                labelVariants({ size })
               )}
             >
               {selectedOption?.label ?? props.placeholder ?? "Select an option"}
