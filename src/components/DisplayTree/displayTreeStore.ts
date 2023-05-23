@@ -22,6 +22,8 @@ export type DisplayTreeStore = {
     deleteAnswer: (answer: Answer) => void;
     currentNodeIndex: number;
     setCurrentNodeIndex: (index: number) => void;
+    animationReverse: boolean;
+    setAnimationReverse: (reverse: boolean) => void;
 };
 
 
@@ -51,9 +53,12 @@ export const useDisplayTreeStore = create<DisplayTreeStore>((set, get) => ({
     addNode: (node) => {
         const nodes = get().nodes;
         set({ nodes: [...nodes, node] });
-    }
-    ,
+    },
     setCurrentNodeIndex: (index) => {
         set({ currentNodeIndex: index });
+    },
+    animationReverse: false,
+    setAnimationReverse: (reverse) => {
+        set({ animationReverse: reverse });
     }
 }));
