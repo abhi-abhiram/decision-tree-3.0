@@ -125,11 +125,11 @@ function Tree() {
         </div>
         <div className="flex h-full w-full flex-1 items-center justify-center">
           <div className="relative flex h-3/4 w-3/4 items-center justify-center rounded border border-gray-200 shadow-md">
-            <div className="flex h-5/6 w-5/6 items-center overflow-auto ">
+            <div className="flex h-5/6 w-5/6 items-center ">
               {transitions((style, { currentNode }) => (
                 <animated.div
                   key={currentNode?.id}
-                  className="h-full w-full"
+                  className="h-full w-full overflow-y-auto"
                   style={style}
                 >
                   {currentNode && (

@@ -2,6 +2,7 @@ import {
   ArrowUpTrayIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
+  ChevronUpIcon,
   LinkIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
@@ -19,7 +20,7 @@ import { Textinput } from "~/components/ui/Textinput";
 import useStore from "~/components/TreeEditor/store";
 import { shallow } from "zustand/shallow";
 import Tabs from "~/components/ui/Tabs";
-import { Tab } from "@headlessui/react";
+import { Disclosure, Tab } from "@headlessui/react";
 import { Textarea } from "~/components/ui/Textarea";
 import _ from "lodash";
 import Select from "~/components/ui/Select";
@@ -36,6 +37,7 @@ import axios from "axios";
 import Options from "~/components/Options";
 import Nav from "~/components/ui/Nav";
 import AddNodeModal from "~/components/TreeEditor/AddNodeModal";
+import Variables from "~/components/Variables";
 
 function LeftNav({
   isShowing,
@@ -301,7 +303,40 @@ function RightNav({
                 {selectedNode?.data.name}
               </div>
             </div>
-            <Options />
+            <Disclosure>
+              {({ open }) => (
+                <>
+                  <Disclosure.Button className="flex w-full items-center justify-between rounded-md border bg-sky-100 p-1 hover:bg-sky-200 ">
+                    <span className="font-medium text-blue-900">Options</span>
+                    <ChevronUpIcon
+                      className={`${
+                        open ? "rotate-180 transform" : ""
+                      } h-5 w-5 text-blue-500`}
+                    />
+                  </Disclosure.Button>
+                  <Disclosure.Panel>
+                    <Options />
+                  </Disclosure.Panel>
+                </>
+              )}
+            </Disclosure>
+            <Disclosure>
+              {({ open }) => (
+                <>
+                  <Disclosure.Button className="flex w-full items-center justify-between rounded-md border bg-sky-100 p-1 hover:bg-sky-200 ">
+                    <span className="font-medium text-blue-900">Variables</span>
+                    <ChevronUpIcon
+                      className={`${
+                        open ? "rotate-180 transform" : ""
+                      } h-5 w-5 text-blue-500`}
+                    />
+                  </Disclosure.Button>
+                  <Disclosure.Panel>
+                    <Variables />
+                  </Disclosure.Panel>
+                </>
+              )}
+            </Disclosure>
           </div>
         </Tab.Panel>
       </Tabs>
@@ -364,21 +399,21 @@ export default function Tree() {
               Workspace /{" "}
               <Link
                 href="/workspace/[id]"
-                as="/workspace/1"
+                as={"/workspace/" + (tree.data?.workspaceId ?? "")}
                 className="text-blue-500 hover:underline"
               >
-                Workspace Name{" "}
+                Workspace
               </Link>
               /{" "}
               <Link
                 href="/workspace/[id]"
-                as="/workspace/1"
+                as="/workspace/"
                 className="
             text-blue-500
             hover:underline
           "
               >
-                Tree Name
+                {tree.data?.name}
               </Link>
             </div>
           </div>

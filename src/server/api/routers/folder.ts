@@ -31,4 +31,10 @@ export const folderRouter = createTRPCRouter({
 
         return foldersAndTrees
     }),
+    delete: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+        const folder = await ctx.prisma.folder.delete({ where: { id: input.id } })
+
+        return folder
+    }
+    ),
 })

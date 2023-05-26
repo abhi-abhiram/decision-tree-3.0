@@ -34,6 +34,20 @@ const selectVariants = cva(
   }
 );
 
+const optionVariants = cva("relative cursor-default select-none w-full", {
+  variants: {
+    size: {
+      default: "text-sm py-3 pl-3 pr-4",
+      sm: "text-sm py-1 pl-2 pr-3",
+      lg: "text-lg py-2 pl-3 pr-4",
+      xl: "text-xl py-2 pl-3 pr-4",
+    },
+  },
+  defaultVariants: {
+    size: "default",
+  },
+});
+
 const labelVariants = cva("", {
   variants: {
     size: {
@@ -143,7 +157,7 @@ export default function Select<T extends string | number>({
         >
           <Listbox.Options
             className={cn(
-              "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm",
+              "absolute mt-1 max-h-60 w-full overflow-auto rounded-md border border-black border-opacity-5 bg-white py-1 text-base shadow-lg focus:outline-none sm:text-sm",
               props.dropdownClass
             )}
           >
@@ -152,7 +166,7 @@ export default function Select<T extends string | number>({
                 key={valueIdx}
                 className={({ active }) =>
                   cn(
-                    "relative cursor-default select-none py-3 pl-3 pr-4",
+                    optionVariants({ size }),
                     active ? "bg-gray-100 text-gray-900" : "text-gray-900",
                     value.icon && "pl-10",
                     props.listboxClass

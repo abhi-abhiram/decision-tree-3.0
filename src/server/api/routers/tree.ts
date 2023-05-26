@@ -11,17 +11,7 @@ export const treeRouter = createTRPCRouter({
             data: {
                 name: input.name,
                 workspaceId: input.workspaceId,
-                ...(
-                    input.folderId ? {
-                        folders: {
-                            connect: {
-                                id: input.folderId
-                            }
-                        }
-                        ,
-
-                    } : {}
-                ),
+                folderId: input.folderId
             }
         })
 
@@ -36,7 +26,16 @@ export const treeRouter = createTRPCRouter({
                 id: input.id
             },
             include: {
-                nodes: true,
+                nodes: {
+                    include: {
+                        vars: {
+                            select: {
+                                id: true,
+                                name: true,
+                            }
+                        }
+                    }
+                },
                 bridgeNodes: true,
             }
         })
@@ -51,6 +50,14 @@ export const treeRouter = createTRPCRouter({
                     type: "SingleInput",
                     question: "Root",
                 },
+                include: {
+                    vars: {
+                        select: {
+                            id: true,
+                            name: true,
+                        }
+                    }
+                }
 
             }
             )
@@ -127,6 +134,19 @@ export const treeRouter = createTRPCRouter({
         }
 
         return rootNode.rootNode;
+    }
+    ),
+
+    delete: publicProcedure.input(z.object({
+        id: z.string()
+    })).mutation(async ({ ctx, input }) => {
+        const tree = await ctx.prisma.tree.delete({
+            where: {
+                id: input.id
+            }
+        })
+
+        return tree
     }
     ),
 })

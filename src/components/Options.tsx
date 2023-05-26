@@ -48,9 +48,7 @@ export default function Options() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium leading-10 text-gray-900">
-          Options
-        </label>
+        <label className="block text-sm font-medium leading-10 text-gray-900"></label>
         <Button
           className="shadow-sm"
           variant={"secondary"}
@@ -77,24 +75,26 @@ export default function Options() {
           Add Option
         </Button>
       </div>
-      {options?.map((option) => (
-        <OptionForm
-          key={option.id}
-          data={{
-            ...option,
-            nextNodeId: option.bridgeId ?? option.nextNodeId,
-            type: option.bridgeId ? "bridgeNode" : "node",
-          }}
-          onSubmit={async (data) => {
-            await updateOption(data);
-          }}
-          onDelete={async () => {
-            await deleteOption(option.id);
-            void utils.option.options.invalidate({ id: selectedNode?.id });
-          }}
-          nextNodeOptions={nextNodeOptions}
-        />
-      ))}
+      <div className="mt-2 space-y-2">
+        {options?.map((option) => (
+          <OptionForm
+            key={option.id}
+            data={{
+              ...option,
+              nextNodeId: option.bridgeId ?? option.nextNodeId,
+              type: option.bridgeId ? "bridgeNode" : "node",
+            }}
+            onSubmit={async (data) => {
+              await updateOption(data);
+            }}
+            onDelete={async () => {
+              await deleteOption(option.id);
+              void utils.option.options.invalidate({ id: selectedNode?.id });
+            }}
+            nextNodeOptions={nextNodeOptions}
+          />
+        ))}
+      </div>
     </>
   );
 }

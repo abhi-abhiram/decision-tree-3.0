@@ -43,9 +43,7 @@ export const workspaceRouter = createTRPCRouter({
         const trees = await ctx.prisma.tree.findMany({
             where: {
                 workspaceId: input.workspaceId,
-                folders: {
-                    none: {}
-                }
+                folderId: null
             },
             orderBy: {
                 updatedAt: 'desc'
@@ -58,11 +56,6 @@ export const workspaceRouter = createTRPCRouter({
         }
         )
 
-        const workspace = await ctx.prisma.workspace.findUnique({
-            where: {
-                id: input.workspaceId
-            }
-        })
 
 
         return {

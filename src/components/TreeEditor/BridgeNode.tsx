@@ -100,7 +100,7 @@ export function BridgeNode(props: NodeProps<BridgeNode>) {
       }}
     >
       <div className="flex h-full flex-1 items-center gap-2">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-blue-500 bg-gray-100">
           <CubeTransparentIcon className={"h-5 w-5"} />
         </div>
         <div className="flex h-full flex-1 flex-col items-stretch justify-center">
@@ -155,11 +155,6 @@ export function BridgeNode(props: NodeProps<BridgeNode>) {
         type="target"
         position={Position.Left}
         className="!-left-3 !h-6 !w-6 !rounded-full !border-4 !border-blue-500 !bg-gray-50"
-      ></Handle>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!-right-3 !h-6 !w-6 !rounded-full !border-4 !border-blue-500 !bg-gray-50"
       ></Handle>
     </div>
   );

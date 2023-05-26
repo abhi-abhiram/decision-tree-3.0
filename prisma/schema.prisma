@@ -29,7 +29,8 @@ model Tree {
     rootNodeId  String?      @unique
     rootNode    Node?        @relation("RootTree", fields: [rootNodeId], references: [id])
     nodes       Node[]
-    folders     Folder[]
+    folderId    String?
+    folder      Folder?      @relation(fields: [folderId], references: [id], onDelete: Cascade)
     vars        Variable[]
     bridgeNodes BridgeNode[] @relation("BridgeFrom")
     bridgedTo   BridgeNode[] @relation("BridgeTo")
@@ -52,6 +53,7 @@ model Node {
     tree              Tree         @relation(fields: [treeId], references: [id], onDelete: Cascade)
     options           Option[]     @relation("NodeOptions")
     Tree              Tree?        @relation("RootTree")
+    vars              Variable[]
     bridgeNodes       BridgeNode[]
     defaultNextNodeId String?
 }
@@ -77,7 +79,7 @@ model Folder {
     createdAt   DateTime  @default(now())
     updatedAt   DateTime  @updatedAt
     parentId    String?
-    parent      Folder?   @relation("ParentChild", fields: [parentId], references: [id])
+    parent      Folder?   @relation("ParentChild", fields: [parentId], references: [id], onDelete: Cascade)
     children    Folder[]  @relation("ParentChild")
     trees       Tree[]
     Workspace   Workspace @relation(fields: [workspaceId], references: [id])
@@ -101,13 +103,14 @@ model Option {
 }
 
 model Variable {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id        String      @id @default(cuid())
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
     name      String
-    value     String
+    operator  VarOperator @default(Replace)
     treeId    String
-    tree      Tree     @relation(fields: [treeId], references: [id])
+    tree      Tree        @relation(fields: [treeId], references: [id], onDelete: Cascade)
+    nodes     Node[]
     options   Option[]
 }
 
@@ -122,4 +125,9 @@ enum NodeType {
 
 enum BridgeType {
     BridgeType
+}
+
+enum VarOperator {
+    Replace
+    Append
 }

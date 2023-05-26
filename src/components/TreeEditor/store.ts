@@ -12,10 +12,12 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "reactflow";
-import { type Tree, type Node, type BridgeNode } from "@prisma/client";
+import { type Tree, type Node, type BridgeNode, type Variable } from "@prisma/client";
 import * as d3 from "d3-hierarchy";
 
-type CustomNode = Node | BridgeNode;
+type CustomNode = (Node & {
+  vars?: { id: string }[];
+}) | BridgeNode;
 
 export type RFState = {
   tree: Tree | null,
