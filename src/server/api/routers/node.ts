@@ -65,7 +65,9 @@ export const nodeRouter = createTRPCRouter({
                     select: {
                         children: true
                     }
-                }
+                },
+                vars: true
+
             }
         })
 
@@ -86,7 +88,9 @@ export const nodeRouter = createTRPCRouter({
                     select: {
                         children: true
                     }
-                }
+                },
+                vars: true
+
             }
         })
 

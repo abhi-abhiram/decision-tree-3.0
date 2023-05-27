@@ -25,6 +25,8 @@ function Tree() {
     setNodes,
     setAnimationReverse,
     animationReverse,
+    variables,
+    setVariable,
   } = useDisplayTreeStore(
     ({
       nodes,
@@ -36,6 +38,8 @@ function Tree() {
       setNodes,
       setAnimationReverse,
       animationReverse,
+      variables,
+      setVariable,
     }) => ({
       nodes,
       addNode,
@@ -46,6 +50,8 @@ function Tree() {
       setNodes,
       setAnimationReverse,
       animationReverse,
+      variables,
+      setVariable,
     })
   );
   const router = useRouter();
@@ -196,13 +202,23 @@ function Tree() {
                             multipleChoiceOption,
                           });
 
+                          currentNode.vars.forEach((variable) => {
+                            setVariable(variable, val.value);
+                          });
                           if (currentNode._count.children === 0) {
                             const ans = new Map(answers);
                             nodes.forEach((node) => {
                               if (!ans.has(node.id)) ans.delete(node.id);
                             });
                             download(
-                              JSON.stringify([...ans, newAns], null, 2),
+                              JSON.stringify(
+                                {
+                                  variables: [...variables],
+                                  answers: [...ans, newAns],
+                                },
+                                null,
+                                2
+                              ),
                               "answers.json",
                               "text/plain"
                             );

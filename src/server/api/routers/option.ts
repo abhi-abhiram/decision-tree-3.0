@@ -81,4 +81,14 @@ export const optionRouter = createTRPCRouter({
     }
     ),
 
+    getOption: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+        const option = await ctx.prisma.option.findUnique({
+            where: {
+                id: input
+            }
+        })
+
+        return option
+    }
+    ),
 })

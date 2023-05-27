@@ -6,16 +6,15 @@ import { VarOperator } from "@prisma/client";
 import { Input } from "./ui/Input";
 import _ from "lodash";
 import { useCallback } from "react";
+import React from "react";
 
 export default function Variables() {
-  const { selectedNode, tree } = useStore(
-    ({ selectedNode, d3Tree, nodes, tree }) => ({
-      selectedNode,
-      d3Tree,
-      nodes,
-      tree,
-    })
-  );
+  const { tree } = useStore(({ selectedNode, d3Tree, nodes, tree }) => ({
+    selectedNode,
+    d3Tree,
+    nodes,
+    tree,
+  }));
 
   const variables = api.variable.getAllVariablesByTreeId.useQuery(
     {
@@ -101,33 +100,7 @@ export default function Variables() {
               size="sm"
             />
             <div className="mb-4 flex items-center">
-              <input
-                id="default-checkbox"
-                type="checkbox"
-                value={variable.id}
-                className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"
-                defaultChecked={
-                  selectedNode?.data.type !== "BridgeType" &&
-                  selectedNode?.data.vars?.some((v) => v.id === variable.id)
-                }
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    void debounce(async () => {
-                      await utils.client.variable.connectNode.mutate({
-                        nodeId: selectedNode?.id ?? "",
-                        variableId: variable.id,
-                      });
-                    });
-                  } else {
-                    void debounce(async () => {
-                      await utils.client.variable.disconnectNode.mutate({
-                        nodeId: selectedNode?.id ?? "",
-                        variableId: variable.id,
-                      });
-                    });
-                  }
-                }}
-              />
+              <CheckBox variableId={variable.id} />
             </div>
           </div>
         ))}
@@ -135,3 +108,69 @@ export default function Variables() {
     </>
   );
 }
+
+export const CheckBox = ({ variableId }: { variableId: string }) => {
+  const { selectedNode } = useStore(
+    ({ selectedNode, d3Tree, nodes, tree }) => ({
+      selectedNode,
+      d3Tree,
+      nodes,
+      tree,
+    })
+  );
+
+  const debounce = useCallback(
+    _.debounce(async (func: () => Promise<void>) => await func(), 1000),
+    []
+  );
+  const utils = api.useContext();
+  const [checked, setChecked] = React.useState(false);
+  const variable = api.variable.getVariableById.useQuery(
+    {
+      id: variableId,
+    },
+    {
+      enabled: !!variableId,
+    }
+  );
+
+  React.useEffect(() => {
+    setChecked(
+      variable.data?.nodes.some((node) => node.id === selectedNode?.id) ?? false
+    );
+  }, [variable.data?.nodes, selectedNode?.id]);
+
+  return (
+    <input
+      id="default-checkbox"
+      type="checkbox"
+      value={variableId}
+      className="h-4 w-4 rounded border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"
+      checked={checked}
+      onChange={(e) => {
+        if (e.target.checked) {
+          void debounce(async () => {
+            await utils.client.variable.connectNode.mutate({
+              nodeId: selectedNode?.id ?? "",
+              variableId,
+            });
+            await utils.variable.getVariableById.invalidate({
+              id: variableId,
+            });
+          });
+        } else {
+          void debounce(async () => {
+            await utils.client.variable.disconnectNode.mutate({
+              nodeId: selectedNode?.id ?? "",
+              variableId: variableId,
+            });
+            await utils.variable.getVariableById.invalidate({
+              id: variableId,
+            });
+          });
+        }
+        setChecked(e.target.checked);
+      }}
+    />
+  );
+};

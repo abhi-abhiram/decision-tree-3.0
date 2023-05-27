@@ -1,3 +1,4 @@
+import { type Variable, } from "@prisma/client";
 import { create } from "zustand";
 import { type RouterOutputs } from "~/utils/api";
 
@@ -24,6 +25,11 @@ export type DisplayTreeStore = {
     setCurrentNodeIndex: (index: number) => void;
     animationReverse: boolean;
     setAnimationReverse: (reverse: boolean) => void;
+    variables: Map<string, {
+        name: string;
+        value: string;
+    }>;
+    setVariable: (data: Variable, value: string) => void;
 };
 
 
@@ -60,5 +66,23 @@ export const useDisplayTreeStore = create<DisplayTreeStore>((set, get) => ({
     animationReverse: false,
     setAnimationReverse: (reverse) => {
         set({ animationReverse: reverse });
+    },
+    variables: new Map(),
+    setVariable: (data, value) => {
+        const variables = get().variables;
+        if (data.operator === "Replace") {
+            variables.set(data.id, { name: data.name, value });
+        } else if (data.operator === "Append") {
+            const variable = variables.get(data.id);
+            if (variable) {
+                variable.value += value;
+                variables.set(data.id, variable);
+            } else {
+                variables.set(data.id, { name: data.name, value });
+            }
+        }
+
+        set({ variables: new Map(variables) });
     }
+
 }));

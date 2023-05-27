@@ -121,8 +121,8 @@ export const treeRouter = createTRPCRouter({
                             select: {
                                 children: true
                             }
-                        }
-
+                        },
+                        vars: true
                     }
                 }
             }
