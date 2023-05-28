@@ -55,7 +55,7 @@ export const nodeRouter = createTRPCRouter({
     getSingleChild: publicProcedure.input(z.object({
         id: z.string()
     })).query(async ({ ctx, input }) => {
-        const node = await ctx.prisma.node.findFirst({
+        let node = await ctx.prisma.node.findFirst({
             where: {
                 parentId: input.id
             },
@@ -63,13 +63,41 @@ export const nodeRouter = createTRPCRouter({
                 options: true,
                 _count: {
                     select: {
-                        children: true
+                        children: true,
+                        bridgeNodes: true
                     }
                 },
                 vars: true
 
             }
         })
+
+        if (!node) {
+            node = (await ctx.prisma.bridgeNode.findFirst({
+                where: {
+                    parentId: input.id
+                },
+                select: {
+                    toTree: {
+                        select: {
+                            rootNode: {
+                                include: {
+                                    options: true,
+                                    _count: {
+                                        select: {
+                                            children: true,
+                                            bridgeNodes: true
+                                        },
+                                    },
+                                    vars: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            ))?.toTree.rootNode ?? null;
+        }
 
         return node
     }
@@ -86,7 +114,8 @@ export const nodeRouter = createTRPCRouter({
                 options: true,
                 _count: {
                     select: {
-                        children: true
+                        children: true,
+                        bridgeNodes: true
                     }
                 },
                 vars: true

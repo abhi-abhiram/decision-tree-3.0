@@ -145,7 +145,10 @@ function Tree() {
                         const submit = async () => {
                           let multipleChoiceOption: string | undefined =
                             undefined;
-                          if (currentNode._count.children !== 0) {
+                          if (
+                            currentNode._count.children !== 0 ||
+                            currentNode._count.bridgeNodes !== 0
+                          ) {
                             let newNode:
                               | DisplayTreeStore["nodes"][number]
                               | null = null;
@@ -205,7 +208,10 @@ function Tree() {
                           currentNode.vars.forEach((variable) => {
                             setVariable(variable, val.value);
                           });
-                          if (currentNode._count.children === 0) {
+                          if (
+                            currentNode._count.children === 0 &&
+                            currentNode._count.bridgeNodes === 0
+                          ) {
                             const ans = new Map(answers);
                             nodes.forEach((node) => {
                               if (!ans.has(node.id)) ans.delete(node.id);

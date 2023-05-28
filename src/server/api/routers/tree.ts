@@ -119,7 +119,8 @@ export const treeRouter = createTRPCRouter({
                         options: true,
                         _count: {
                             select: {
-                                children: true
+                                children: true,
+                                bridgeNodes: true
                             }
                         },
                         vars: true
