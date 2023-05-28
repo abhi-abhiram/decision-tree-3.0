@@ -150,4 +150,25 @@ export const treeRouter = createTRPCRouter({
         return tree
     }
     ),
+
+    update: publicProcedure.input(z.object({
+        id: z.string(),
+        name: z.string().optional(),
+        folderId: z.string().optional(),
+        rootNodeId: z.string().optional()
+    })).mutation(async ({ ctx, input }) => {
+        const tree = await ctx.prisma.tree.update({
+            where: {
+                id: input.id
+            },
+            data: {
+                name: input.name,
+                folderId: input.folderId,
+                rootNodeId: input.rootNodeId
+            }
+        })
+
+        return tree
+    }
+    ),
 })

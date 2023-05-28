@@ -37,4 +37,11 @@ export const folderRouter = createTRPCRouter({
         return folder
     }
     ),
+
+    update: publicProcedure.input(z.object({ id: z.string(), name: z.string() })).mutation(async ({ ctx, input }) => {
+        const folder = await ctx.prisma.folder.update({ where: { id: input.id }, data: { name: input.name } })
+
+        return folder
+    }
+    ),
 })

@@ -62,6 +62,7 @@ export const ContextMenu = ({
     selected: state.selected,
   }));
   const [showDelete, setShowDelete] = React.useState(false);
+  const [showRename, setShowRename] = React.useState(false);
 
   useOnClickOutside(menuref, () => {
     setShowing(false);
@@ -103,7 +104,9 @@ export const ContextMenu = ({
               Edit
             </ContextListItem>
             <Break />
-            <ContextListItem>Rename</ContextListItem>
+            <ContextListItem onClick={() => setShowRename(true)}>
+              Rename
+            </ContextListItem>
             <Break />
             <ContextListItem onClick={() => setShowDelete(true)}>
               Delete
@@ -112,9 +115,66 @@ export const ContextMenu = ({
         </div>
       </Transition>
       <Delete isOpen={showDelete} onClose={() => setShowDelete(false)} />
+      <Rename isOpen={showRename} onClose={() => setShowRename(false)} />
     </>
   );
 };
+
+function Rename({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const { selected } = useWorkspaceStore((state) => ({
+    setSelected: state.setSelected,
+    selected: state.selected,
+  }));
+  const [name, setName] = React.useState("");
+  const renameTree = api.tree.update.useMutation();
+  const renameFolder = api.folder.update.useMutation();
+  const utils = api.useContext();
+
+  return (
+    <Modal title="Rename" isOpen={isOpen} setIsOpen={onClose}>
+      <div className="mt-2 flex flex-col gap-2">
+        <p>
+          Enter a new name for this{" "}
+          {selected?.type === "tree" ? "Tree" : "Folder"}:
+        </p>
+        <input
+          type="text"
+          className="rounded-md border border-gray-300 p-2"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <div className="flex justify-end gap-2">
+          <Button
+            className="bg-blue-600 text-white hover:bg-blue-500"
+            onClick={() => {
+              async function renameTreeOrFolder() {
+                if (selected)
+                  if (selected.type === "tree") {
+                    await renameTree.mutateAsync({ id: selected.id, name });
+                  } else {
+                    await renameFolder.mutateAsync({ id: selected.id, name });
+                  }
+                await utils.workspace.foldersAndTrees.invalidate();
+                onClose();
+              }
+              void renameTreeOrFolder();
+            }}
+            isloading={renameTree.isLoading || renameFolder.isLoading}
+          >
+            Rename
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            className="focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-blue-500"
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
 
 function Delete({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const cancelRef = React.useRef<HTMLButtonElement>(null);
