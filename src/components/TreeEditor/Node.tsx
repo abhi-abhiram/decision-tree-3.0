@@ -189,11 +189,13 @@ export function TextUpdaterNode(props: NodeProps<CustomNode>) {
         type="target"
         position={Position.Left}
         className="!-left-3 !h-6 !w-6 !rounded-full !border-4 !border-blue-500 !bg-gray-50"
+        isConnectable={false}
       ></Handle>
       <Handle
         type="source"
         position={Position.Right}
         className="!-right-3 !h-6 !w-6 !rounded-full !border-4 !border-blue-500 !bg-gray-50"
+        isConnectable={false}
       ></Handle>
     </div>
   );
