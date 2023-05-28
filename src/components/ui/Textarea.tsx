@@ -7,7 +7,8 @@ const textareaVariants = cva(
   {
     variants: {
       variant: {
-        default: "transition-colors ease-in-out duration-200",
+        default:
+          "transition-colors ease-in-out duration-200 border border-gray-200",
         unstyled: "outline-none rounded-none",
         error: "outline-red-500",
         flushed:

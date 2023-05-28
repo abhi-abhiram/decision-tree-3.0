@@ -38,6 +38,7 @@ import Options from "~/components/Options";
 import Nav from "~/components/ui/Nav";
 import AddNodeModal from "~/components/TreeEditor/AddNodeModal";
 import Variables from "~/components/Variables";
+import { Input } from "~/components/ui/Input";
 
 function LeftNav({
   isShowing,
@@ -191,6 +192,7 @@ function RightNav({
   const router = useRouter();
   const [question, setQuestion] = React.useState<string | null>(null);
   const { mutateAsync: updateNodeMutation } = api.node.update.useMutation();
+  const [name, setName] = React.useState<string | null>(null);
 
   const updateNode = useCallback(
     _.debounce(async (node: UpdateNodeInput, fullNode: Node) => {
@@ -204,6 +206,7 @@ function RightNav({
     if (selectedNode && selectedNode.data.type !== "BridgeType") {
       setQuestion(selectedNode.data.question);
       setSelected(selectedNode.data.type);
+      setName(selectedNode.data.name);
     }
   }, [selectedNode]);
 
@@ -220,6 +223,31 @@ function RightNav({
     >
       <Tabs tabs={["Question", "Logic"]}>
         <Tab.Panel className={cn("bg-white p-3")}>
+          <div>
+            <label className="block text-sm font-medium leading-10 text-gray-900">
+              Name
+            </label>
+            <div>
+              <Input
+                value={name ?? ""}
+                placeholder="Enter Name"
+                onChange={(event) => {
+                  setName(event.target.value);
+
+                  if (selectedNode && selectedNode.data.type !== "BridgeType") {
+                    selectedNode.data.name = event.target.value;
+                    void updateNode(
+                      {
+                        id: selectedNode?.id ?? "",
+                        name: event.target.value,
+                      },
+                      selectedNode.data
+                    );
+                  }
+                }}
+              />
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium leading-10 text-gray-900">
               Question
