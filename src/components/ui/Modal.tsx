@@ -65,7 +65,7 @@ export default function Modal({
             >
               <Dialog.Panel
                 className={cn(
-                  "relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all",
+                  "relative w-[28rem] transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all",
                   className
                 )}
               >

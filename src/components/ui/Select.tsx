@@ -157,7 +157,7 @@ export default function Select<T extends string | number>({
         >
           <Listbox.Options
             className={cn(
-              "absolute mt-1 max-h-60 w-full overflow-auto rounded-md border border-black border-opacity-5 bg-white py-1 text-base shadow-lg focus:outline-none sm:text-sm",
+              "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-black border-opacity-5 bg-white py-1 text-base shadow-lg focus:outline-none sm:text-sm",
               props.dropdownClass
             )}
           >

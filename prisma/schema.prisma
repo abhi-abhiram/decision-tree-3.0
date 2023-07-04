@@ -102,16 +102,43 @@ model Option {
     bridge     BridgeNode? @relation(fields: [bridgeId], references: [id], onDelete: Cascade)
 }
 
+model Model {
+    id              String     @id @default(cuid())
+    createdAt       DateTime   @default(now())
+    updatedAt       DateTime   @updatedAt
+    name            String
+    sourceRelations Relation[] @relation("source")
+    targetRelations Relation[] @relation("target")
+    variables       Variable[]
+}
+
 model Variable {
-    id        String      @id @default(cuid())
-    createdAt DateTime    @default(now())
-    updatedAt DateTime    @updatedAt
+    id           String      @id @default(cuid())
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
+    name         String
+    dataType     VarDataType @default(String)
+    modelId      String
+    model        Model       @relation(fields: [modelId], references: [id], onDelete: Cascade)
+    isForeignKey Boolean     @default(false)
+    operator     VarOperator @default(Replace)
+    treeId       String?
+    tree         Tree?       @relation(fields: [treeId], references: [id], onDelete: Cascade)
+    nodes        Node[]
+    options      Option[]
+}
+
+model Relation {
+    id        String       @id @default(cuid())
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
     name      String
-    operator  VarOperator @default(Replace)
-    treeId    String
-    tree      Tree        @relation(fields: [treeId], references: [id], onDelete: Cascade)
-    nodes     Node[]
-    options   Option[]
+    sourceId  String
+    targetId  String
+    source    Model        @relation("source", fields: [sourceId], references: [id])
+    target    Model        @relation("target", fields: [targetId], references: [id])
+    varId     String       @unique
+    type      RelationType
 }
 
 enum NodeType {
@@ -130,4 +157,17 @@ enum BridgeType {
 enum VarOperator {
     Replace
     Append
+}
+
+enum VarDataType {
+    String
+    Number
+    Date
+    Boolean
+}
+
+enum RelationType {
+    OneToOne
+    OneToMany
+    ManyToMany
 }

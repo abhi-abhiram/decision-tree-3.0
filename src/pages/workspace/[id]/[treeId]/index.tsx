@@ -37,7 +37,6 @@ import axios from "axios";
 import Options from "~/components/Options";
 import Nav from "~/components/ui/Nav";
 import AddNodeModal from "~/components/TreeEditor/AddNodeModal";
-import Variables from "~/components/Variables";
 import { Input } from "~/components/ui/Input";
 
 function LeftNav({
@@ -359,9 +358,7 @@ function RightNav({
                       } h-5 w-5 text-blue-500`}
                     />
                   </Disclosure.Button>
-                  <Disclosure.Panel>
-                    <Variables />
-                  </Disclosure.Panel>
+                  <Disclosure.Panel></Disclosure.Panel>
                 </>
               )}
             </Disclosure>

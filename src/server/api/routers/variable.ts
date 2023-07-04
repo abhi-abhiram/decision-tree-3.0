@@ -1,20 +1,42 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { VarOperator } from "@prisma/client";
+import { RelationType, VarDataType, VarOperator } from "@prisma/client";
 
 export const variableRouter = createTRPCRouter({
     create: publicProcedure.input(z.object({
         name: z.string(),
-        treeId: z.string(),
+        modelId: z.string(),
+        dataType: z.nativeEnum(VarDataType),
+        relation: z.object({
+            isForeignKey: z.boolean(),
+            targetId: z.string(),
+            type: z.nativeEnum(RelationType),
+            name: z.string()
+        }).optional()
     })).mutation(async ({ input, ctx }) => {
-        const vairable = await ctx.prisma.variable.create({
+        const variable = await ctx.prisma.variable.create({
             data: {
                 name: input.name,
-                treeId: input.treeId
+                modelId: input.modelId,
+                dataType: input.dataType,
+                isForeignKey: input.relation?.isForeignKey,
 
             }
         })
-        return vairable
+        if (input.relation) {
+            await ctx.prisma.relation.create({
+                data: {
+                    type: input.relation.type,
+                    sourceId: input.modelId,
+                    targetId: input.relation.targetId,
+                    varId: variable.id,
+                    name: input.relation.name
+
+                }
+            })
+        }
+
+        return variable;
     }),
 
     update: publicProcedure.input(z.object({

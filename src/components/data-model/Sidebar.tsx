@@ -3,37 +3,38 @@ import { CubeIcon as SolidCubeIcon } from "@heroicons/react/24/solid";
 import { Button } from "../ui/Button";
 import Nav from "../ui/Nav";
 import React from "react";
-import { PlusIcon } from "@heroicons/react/24/solid";
+import { api } from "~/utils/api";
+import { useRouter } from "next/router";
+import CreateModel from "./CreateModel";
+import Link from "next/link";
 
 export default function Sidebar() {
-  const [isShowing, setIsShowing] = React.useState(true);
+  const models = api.model.models.useQuery();
+  const { query } = useRouter();
+
   return (
-    <Nav isShowing={isShowing}>
+    <Nav isShowing={true}>
       <div className="flex h-full flex-col p-4">
         <div className="flex flex-1 flex-col gap-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Models</span>
-            <button className="rounded-md p-2 text-neutral-500 hover:bg-gray-100 hover:text-inherit">
-              <PlusIcon className="h-4 w-4" />
-            </button>
+            <CreateModel />
           </div>
           <div className="flex flex-1 flex-col overflow-auto">
-            <button className="group flex items-center rounded-md p-2 text-left text-sm hover:bg-gray-100">
-              {false ? (
-                <SolidCubeIcon className="mr-2 inline-block h-4 w-4 text-gray-500 group-hover:text-inherit" />
-              ) : (
-                <CubeIcon className="mr-2 inline-block h-4 w-4 text-gray-500 group-hover:text-inherit" />
-              )}
-              User
-            </button>
-            <button className="group flex items-center rounded-md p-2 text-left text-sm hover:bg-gray-100">
-              {false ? (
-                <SolidCubeIcon className="mr-2 inline-block h-4 w-4 text-gray-500 group-hover:text-inherit" />
-              ) : (
-                <CubeIcon className="mr-2 inline-block h-4 w-4 text-gray-500 group-hover:text-inherit" />
-              )}
-              Employee
-            </button>
+            {models.data?.map((model) => (
+              <Link
+                className="group flex items-center rounded-md p-2 text-left text-sm hover:bg-gray-100"
+                key={model.id}
+                href={`/data-model/${model.id}`}
+              >
+                {query.id === model.id ? (
+                  <SolidCubeIcon className="mr-2 inline-block h-4 w-4 text-gray-500 group-hover:text-inherit" />
+                ) : (
+                  <CubeIcon className="mr-2 inline-block h-4 w-4 text-gray-500 group-hover:text-inherit" />
+                )}
+                {model.name}
+              </Link>
+            ))}
           </div>
         </div>
         <div className="pt-4">
