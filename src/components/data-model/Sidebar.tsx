@@ -10,7 +10,7 @@ import Link from "next/link";
 
 export default function Sidebar() {
   const models = api.model.models.useQuery();
-  const { query } = useRouter();
+  const { query, push } = useRouter();
 
   return (
     <Nav isShowing={true}>
@@ -38,7 +38,12 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="pt-4">
-          <Button className="w-full bg-slate-400 transition-colors duration-200 ease-in-out hover:bg-slate-500">
+          <Button
+            className="w-full bg-slate-400 transition-colors duration-200 ease-in-out hover:bg-slate-500"
+            onClick={() => {
+              void push(`/data-model/`);
+            }}
+          >
             Visualize Schema <EyeIcon className="ml-2 h-4 w-4" />
           </Button>
         </div>
