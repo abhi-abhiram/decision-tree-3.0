@@ -230,6 +230,7 @@ export default function Model() {
       enabled: !!query.id,
     }
   );
+  const { mutate: updateName } = api.model.updateName.useMutation();
   const [field, setField] = React.useState<(typeof Fields)[number] | null>(
     null
   );
@@ -246,6 +247,13 @@ export default function Model() {
               focus:bg-white focus:text-inherit
               "
               contentEditable={true}
+              suppressContentEditableWarning={true}
+              onBlur={(e) => {
+                updateName({
+                  id: query.id as string,
+                  name: e.target.textContent ?? "",
+                });
+              }}
             >
               {data?.name}
             </h2>

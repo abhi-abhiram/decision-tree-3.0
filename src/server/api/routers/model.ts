@@ -79,4 +79,25 @@ export const modelRouter = createTRPCRouter({
         return model;
     }
     ),
+
+    updateName: publicProcedure.input(z.object({
+        id: z.string(),
+        name: z.string(),
+    })).mutation(({
+        input: { id, name },
+        ctx: { prisma },
+    }) => {
+        const model = prisma.model.update({
+            where: {
+                id,
+            },
+            data: {
+                name,
+            },
+        }
+        );
+
+        return model;
+    }
+    ),
 })
