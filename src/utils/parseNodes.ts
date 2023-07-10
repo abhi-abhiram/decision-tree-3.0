@@ -11,7 +11,7 @@ export const parseNodes = (models: RouterOutputs["model"]['modelsWithVariables']
         const modelNode: Node<ModelNodeData> = {
             id: model.id,
             type: "model",
-            position: { x: 0, y: 0 },
+            position: { x: model.positionX, y: model.positionY },
             data: {
                 id: model.id,
                 name: model.name,

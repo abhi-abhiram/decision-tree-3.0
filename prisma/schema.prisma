@@ -110,6 +110,8 @@ model Model {
     sourceRelations Relation[] @relation("source")
     targetRelations Relation[] @relation("target")
     variables       Variable[]
+    positionX       Int        @default(0)
+    positionY       Int        @default(0)
 }
 
 model Variable {

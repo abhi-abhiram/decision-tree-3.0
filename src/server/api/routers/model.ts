@@ -55,5 +55,28 @@ export const modelRouter = createTRPCRouter({
         });
 
         return models;
-    })
+    }),
+
+    updatePosition: publicProcedure.input(z.object({
+        id: z.string(),
+        positionX: z.number(),
+        positionY: z.number(),
+    })).mutation(({
+        input: { id, positionX, positionY },
+        ctx: { prisma },
+    }) => {
+        const model = prisma.model.update({
+            where: {
+                id,
+            },
+            data: {
+                positionX,
+                positionY,
+            },
+        }
+        );
+
+        return model;
+    }
+    ),
 })
