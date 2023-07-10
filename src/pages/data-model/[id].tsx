@@ -230,6 +230,7 @@ export default function Model() {
       enabled: !!query.id,
     }
   );
+  const utils = api.useContext();
   const { mutate: updateName } = api.model.updateName.useMutation();
   const [field, setField] = React.useState<(typeof Fields)[number] | null>(
     null
@@ -252,6 +253,14 @@ export default function Model() {
                 updateName({
                   id: query.id as string,
                   name: e.target.textContent ?? "",
+                });
+                utils.model.models.setData(undefined, (old) => {
+                  if (!old) return old;
+                  return old.map((model) => {
+                    if (model.id === query.id)
+                      return { ...model, name: e.target.textContent ?? "" };
+                    return model;
+                  });
                 });
               }}
             >
