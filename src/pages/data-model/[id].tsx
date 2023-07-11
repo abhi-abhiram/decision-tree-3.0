@@ -80,8 +80,8 @@ const AddField = ({
           isForeignKey: false,
           referenceModel: "",
           relationType: RelationType.OneToMany,
-          dataType: VarDataType.String,
-          referenceName: "",
+          dataType: field ? field.value : VarDataType.String,
+          relationName: "",
         }}
         onSubmit={(values) => {
           mutate({
@@ -93,7 +93,7 @@ const AddField = ({
                 isForeignKey: values.isForeignKey,
                 targetId: values.referenceModel,
                 type: values.relationType,
-                name: values.referenceName,
+                name: values.relationName,
               },
             }),
           });
@@ -123,23 +123,26 @@ const AddField = ({
                     name="dataType"
                     options={Fields.map((field) => ({
                       label: field.name,
-                      value: field.name,
+                      value: field.value,
                       icon: field.icon,
                     }))}
                     showValueIcon={true}
                   ></Select>
                 </div>
-                <div className="mt-4 flex items-center gap-8">
-                  <div>
-                    <label
-                      htmlFor="isForeignKey"
-                      className="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                      Is Foreign Key
-                    </label>
-                    <FormCheckbox name="isForeignKey" />
+                {(values.dataType === "String" ||
+                  values.dataType === "Number") && (
+                  <div className="mt-4 flex items-center gap-8">
+                    <div>
+                      <label
+                        htmlFor="isForeignKey"
+                        className="mb-2 block text-sm font-medium text-gray-700"
+                      >
+                        Is Foreign Key
+                      </label>
+                      <FormCheckbox name="isForeignKey" />
+                    </div>
                   </div>
-                </div>
+                )}
                 {values.isForeignKey && (
                   <>
                     <div className="mt-4 ">
@@ -183,14 +186,14 @@ const AddField = ({
                     </div>
                     <div className="mt-4">
                       <label
-                        htmlFor="referenceName"
+                        htmlFor="relationName"
                         className="mb-2 block text-sm font-medium text-gray-700"
                       >
-                        Reference Name
+                        Relation Name
                       </label>
                       <Textinput
-                        placeholder="Reference Name"
-                        name="referenceName"
+                        placeholder="Give a name to the relation"
+                        name="relationName"
                       />
                     </div>
                   </>
@@ -222,7 +225,7 @@ const AddField = ({
 
 export default function Model() {
   const { query } = useRouter();
-  const { data } = api.model.model.useQuery(
+  const { data: modelData } = api.model.model.useQuery(
     {
       id: query.id as string,
     },
@@ -264,13 +267,13 @@ export default function Model() {
                 });
               }}
             >
-              {data?.name}
+              {modelData?.name}
             </h2>
             <div className="mt-2 h-1 w-full border-b border-gray-400" />
           </div>
           <div className="flex flex-1 flex-row items-center justify-between gap-3 overflow-hidden">
             <div className="h-full flex-1 space-y-3 overflow-y-auto">
-              {data?.variables.map((data, i) => (
+              {modelData?.variables.map((data, i) => (
                 <button
                   key={data.id}
                   className="w-full rounded-lg border border-white bg-white p-4 hover:border-indigo-500"
@@ -295,6 +298,16 @@ export default function Model() {
                         <div className="rounded bg-gray-100 px-1 py-0.5 text-sm text-gray-700">
                           {data.dataType}
                         </div>
+                        {modelData.primaryKeyId === data.id && (
+                          <div className="rounded bg-gray-100 px-1 py-0.5 text-sm text-gray-700">
+                            Primary Key
+                          </div>
+                        )}
+                        {data.isForeignKey && (
+                          <div className="rounded bg-gray-100 px-1 py-0.5 text-sm text-gray-700">
+                            Foreign Key
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

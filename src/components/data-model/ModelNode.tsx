@@ -18,13 +18,10 @@ export interface ModelNodeData {
     sourceId: string | null;
     targetId: string | null;
   }[];
+  primaryKeyId: string;
 }
 
 type ColumnData = ModelNodeData["variables"][number];
-
-const isTarget = ({ targetId }: ColumnData, modelId: string) => {
-  return targetId === modelId;
-};
 
 const isSource = ({ sourceId }: ColumnData, modelId: string) =>
   sourceId === modelId;
@@ -56,17 +53,17 @@ const ModelNode = ({ data }: ModelNodeProps) => {
                   "p-2",
                   {
                     "cursor-pointer":
-                      isTarget(col, data.id) || isSource(col, data.id),
+                      col.id === data.primaryKeyId || isSource(col, data.id),
                   },
                 ])}
               >
                 {col.name}
-                {isTarget(col, data.id) && (
+                {col.id === data.primaryKeyId && (
                   <Handle
                     key={`${data.name}-${col.name}`}
                     className={cc([styles.handle, styles.left])}
                     type="target"
-                    id={`${data.name}-${col.id}`}
+                    id={col.id}
                     position={Position.Left}
                     isConnectable={false}
                   />
@@ -83,7 +80,7 @@ const ModelNode = ({ data }: ModelNodeProps) => {
                     key={`${data.name}-${col.name}`}
                     className={cn([styles.handle, styles.right])}
                     type="source"
-                    id={`${data.name}-${col.id}`}
+                    id={col.id}
                     position={Position.Right}
                     isConnectable={false}
                   />

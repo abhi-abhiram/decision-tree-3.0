@@ -4,7 +4,6 @@ import { api } from "~/utils/api";
 import FlowView from "~/components/data-model/Flow";
 import { parseNodes } from "~/utils/parseNodes";
 import "reactflow/dist/style.css";
-import { ReactFlow, applyNodeChanges } from "reactflow";
 
 export default function Models() {
   const models = api.model.modelsWithVariables.useQuery();

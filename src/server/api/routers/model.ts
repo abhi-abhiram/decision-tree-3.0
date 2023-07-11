@@ -4,16 +4,25 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc"
 export const modelRouter = createTRPCRouter({
     create: publicProcedure.input(z.object({
         name: z.string(),
-    })).mutation(({
+    })).mutation(async ({
         input: { name },
         ctx: { prisma },
     }) => {
-        const model = prisma.model.create({
+        const model = await prisma.model.create({
             data: {
                 name,
             },
         }
         );
+
+        await prisma.variable.create({
+            data: {
+                name: "id",
+                dataType: "String",
+                id: model.primaryKeyId,
+                modelId: model.id,
+            }
+        });
 
         return model;
     }),

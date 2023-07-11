@@ -110,6 +110,7 @@ model Model {
     sourceRelations Relation[] @relation("source")
     targetRelations Relation[] @relation("target")
     variables       Variable[]
+    primaryKeyId    String     @unique @default(cuid())
     positionX       Float      @default(0)
     positionY       Float      @default(0)
 }
@@ -171,5 +172,6 @@ enum VarDataType {
 enum RelationType {
     OneToOne
     OneToMany
+    ManyToOne
     ManyToMany
 }

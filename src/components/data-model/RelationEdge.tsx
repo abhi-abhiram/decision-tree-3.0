@@ -51,6 +51,7 @@ const RelationEdge = ({
     ManyToMany: ["url(#prismaliser-many)", "url(#prismaliser-many)"],
     OneToMany: ["url(#prismaliser-many)", "url(#prismaliser-one)"],
     OneToOne: ["url(#prismaliser-one)", "url(#prismaliser-one)"],
+    ManyToOne: ["url(#prismaliser-many)", "url(#prismaliser-one)"],
   }[relationType];
 
   return (

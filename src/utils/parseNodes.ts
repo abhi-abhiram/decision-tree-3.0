@@ -24,20 +24,27 @@ export const parseNodes = (models: RouterOutputs["model"]['modelsWithVariables']
                     relationType: null,
                     sourceId: null,
                     targetId: null,
-                }))
+                })),
+                primaryKeyId: model.primaryKeyId,
             },
 
         };
 
         model.sourceRelations.map((val) => {
+            const targetModel = models.find(({ id }) => id === val.targetId);
             const edge: Edge<RelationEdgeData> = {
                 id: `${val.id}`,
-                sourceHandle: `${model.name}-${val.varId}`,
+                sourceHandle: val.varId,
                 target: val.targetId,
                 source: model.id,
-                targetHandle: `${model.name}-${val.id}`,
-                type: "relation"
+                targetHandle: targetModel?.primaryKeyId,
+                type: "relation",
+                data: {
+                    relationType: val.type,
+                }
+
             }
+
             edges.push(edge);
             const variable = modelNode.data.variables.find(({ id }) => id === val.varId);
             if (variable) {
@@ -47,17 +54,6 @@ export const parseNodes = (models: RouterOutputs["model"]['modelsWithVariables']
             }
         })
 
-        model.targetRelations.map(val => {
-            modelNode.data.variables.push({
-                id: val.id,
-                dataType: "String",
-                isForeignKey: true,
-                name: val.name,
-                relationType: val.type,
-                sourceId: val.sourceId,
-                targetId: val.targetId,
-            })
-        });
         nodes.push(modelNode);
     })
     return { nodes, edges };

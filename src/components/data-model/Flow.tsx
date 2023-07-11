@@ -73,6 +73,48 @@ const FlowView = ({ data }: FlowViewProps) => {
           className="text-gray-500"
         />
       </ReactFlow>
+      <svg width="0" height="0">
+        <defs>
+          <marker
+            id="prismaliser-one"
+            markerWidth="12.5"
+            markerHeight="12.5"
+            // eslint-disable-next-line react/no-unknown-property
+            viewBox="-10 -10 20 20"
+            orient="auto-start-reverse"
+            refX="0"
+            refY="0"
+          >
+            <polyline
+              className="stroke-current text-gray-400"
+              strokeWidth="3"
+              strokeLinecap="square"
+              fill="none"
+              points="-10,-8 -10,8"
+            />
+          </marker>
+
+          <marker
+            id="prismaliser-many"
+            markerWidth="12.5"
+            markerHeight="12.5"
+            // eslint-disable-next-line react/no-unknown-property
+            viewBox="-10 -10 20 20"
+            orient="auto-start-reverse"
+            refX="0"
+            refY="0"
+          >
+            <polyline
+              className="stroke-current text-gray-400"
+              strokeLinejoin="round"
+              strokeLinecap="square"
+              strokeWidth="1.5"
+              fill="none"
+              points="0,-8 -10,0 0,8"
+            />
+          </marker>
+        </defs>
+      </svg>
     </>
   );
 };
