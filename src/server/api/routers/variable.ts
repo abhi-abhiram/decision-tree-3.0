@@ -11,7 +11,7 @@ export const variableRouter = createTRPCRouter({
             isForeignKey: z.boolean(),
             targetId: z.string(),
             type: z.nativeEnum(RelationType),
-            name: z.string()
+            name: z.string().default(""),
         }).optional()
     })).mutation(async ({ input, ctx }) => {
         const variable = await ctx.prisma.variable.create({
